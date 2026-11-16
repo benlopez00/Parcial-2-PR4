@@ -1,20 +1,20 @@
 # Prompt 3 — Auditoría, Informe para el Desarrollador y Respuestas de Defensa
 
-> **Cuándo usarlo:** Al terminar el desarrollo de un ticket con el **Prompt 2**.
-> **Objetivo:** Verificar que el código cumpla todas las reglas de `AGENTS.md` y del parcial, generar el informe explicativo en la carpeta del ticket y completar las respuestas de defensa en `respuestas-defensa.md`.
+> **Cuándo usarlo:** Al terminar el desarrollo de un ticket con el **Prompt 2** (puede ejecutarse en cualquier proveedor o sesión de IA).
+> **Objetivo:** Verificar que el código cumpla todas las reglas de `AGENTS.md`, `ticket.md` y `plan.md`, generar el informe explicativo en `informe-auditoria.md` y completar las respuestas de defensa en `respuestas-defensa.md`.
 
 ---
 
 ## Copiar y pegar en el chat de la IA (reemplazando `TXX`):
 
 ```markdown
-Realizá la **Auditoría Final y Documentación de Defensa** del ticket **[INDICAR CARPETA DEL TICKET, ej: tickets/T01-base-datos-errores-y-formatos/ticket.md]**.
+Realizá la **Auditoría Final y Documentación de Defensa** del ticket ubicado en **[INDICAR CARPETA DEL TICKET, ej: tickets/T01-base-datos-errores-y-formatos]**.
 
-Seguí estos 4 pasos en orden:
+Leé primero `AGENTS.md`, el `ticket.md` y el `plan.md` de esa carpeta, y luego seguí estos 4 pasos en orden:
 
 ### Paso 1: Auditoría Técnica y de Legibilidad
-Revisá todos los archivos creados o modificados en este ticket y comprobá:
-1. ¿Se cumplen todos los requerimientos y criterios de aceptación del `ticket.md`?
+Revisá todos los archivos creados o modificados según `plan.md` y comprobá:
+1. ¿Se cumplen todos los requerimientos y criterios de aceptación del `ticket.md` y del `plan.md`?
 2. ¿Los nombres de archivos, variables y funciones están en castellano claro y descriptivo?
 3. ¿El flujo normal en `src/servicios/` está limpio y separado del control de errores (`src/errores/`), de las validaciones (`src/validaciones/`) y de las pruebas (`src/pruebas/`)?
 4. ¿Ningún `route.ts`, Server Action o componente contiene lógica de negocio ni formateos manuales?

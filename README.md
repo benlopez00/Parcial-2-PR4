@@ -43,9 +43,9 @@ Para resolver cada ticket se siguen **3 pasos estrictos** usando las plantillas 
 
 1. **Planificación ([`prompts/01-planificacion.md`](./prompts/01-planificacion.md)):**
    - El agente lee [`AGENTS.md`](./AGENTS.md), el `ticket.md` y las capturas de referencia en [`docs/pantallas/`](./docs/pantallas/INDICE.md).
-   - Devuelve un plan breve con los archivos a crear/modificar, nombres en castellano y reglas de negocio involucradas.
+   - Guarda el plan técnico en `tickets/TXX-.../plan.md` (con los archivos a crear/modificar, nombres en castellano y reglas de negocio involucradas) para que pueda ser leído por cualquier IA de cualquier proveedor.
 2. **Desarrollo ([`prompts/02-desarrollo.md`](./prompts/02-desarrollo.md)):**
-   - Pensado para ejecutarse en un **modelo más económico en tokens**.
+   - Pensado para ejecutarse en un **modelo más económico en tokens** (o en otro proveedor de IA), leyendo directamente `plan.md`.
    - Implementa el código respetando la separación estricta: flujo normal en `src/servicios/`, control de errores en `src/errores/`, esquemas Zod en `src/validaciones/` y tests en `src/pruebas/`.
 3. **Auditoría y Defensa ([`prompts/03-auditoria-y-defensa.md`](./prompts/03-auditoria-y-defensa.md)):**
    - Audita el código contra [`AGENTS.md`](./AGENTS.md) y ejecuta las pruebas.
