@@ -231,3 +231,72 @@ export function asegurarPagoNoSuperaDeuda(importe: number, saldoActual: number):
     });
   }
 }
+
+// Implementa RF-V6 y Reglas 1 y 2: antes de descontar junta TODOS los problemas del pedido,
+// para que el vendedor vea de una qué falta y no de a un producto por vez.
+export function asegurarProductosActivosYConStock(
+  catalogo: { id: number; codigo: string; existencia: number; activo: boolean }[],
+  items: { productoId: number; cantidad: number }[],
+): void {
+  const porId = new Map(catalogo.map((producto) => [producto.id, producto]));
+
+  const inactivos = items.flatMap((item) => {
+    const producto = porId.get(item.productoId);
+    return producto && !producto.activo ? [{ productoId: producto.id, codigo: producto.codigo }] : [];
+  });
+  if (inactivos.length > 0) {
+    throw new ErrorApi(422, CODIGOS_ERROR.PRODUCTO_INACTIVO, "Hay productos dados de baja en la venta.", inactivos);
+  }
+
+  const faltantes = items.flatMap((item) => {
+    const producto = porId.get(item.productoId);
+    return producto && producto.existencia < item.cantidad
+      ? [{ productoId: producto.id, codigo: producto.codigo, solicitado: item.cantidad, disponible: producto.existencia }]
+      : [];
+  });
+  if (faltantes.length > 0) {
+    throw new ErrorApi(409, CODIGOS_ERROR.STOCK_INSUFICIENTE, "No hay stock suficiente.", faltantes);
+  }
+}
+
+// Implementa Regla 6: el consumidor final no compra en cuenta corriente, y el cliente debe estar habilitado.
+export function asegurarCuentaCorrientePermitida(cliente: { cuentaCorriente: boolean } | null): void {
+  if (!cliente?.cuentaCorriente) {
+    throw new ErrorApi(422, CODIGOS_ERROR.CUENTA_CORRIENTE_NO_HABILITADA,
+      "La venta en cuenta corriente exige un cliente registrado y habilitado.");
+  }
+}
+
+// Implementa Regla 7: una venta a cuenta no puede dejar el saldo por encima del límite. Sin límite, no hay tope.
+export function asegurarLimiteCreditoNoExcedido(saldoActual: number, total: number, limite: number | null): void {
+  if (limite === null) return;
+  const saldoNuevo = saldoActual + total;
+  if (saldoNuevo > limite) {
+    throw new ErrorApi(422, CODIGOS_ERROR.LIMITE_CREDITO_EXCEDIDO, "La venta supera el límite de crédito del cliente.", {
+      saldoActual, limite, excedente: saldoNuevo - limite,
+    });
+  }
+}
+
+// Implementa RF-V5: en una venta de contado el monto recibido tiene que cubrir el total.
+export function asegurarMontoRecibidoSuficiente(montoRecibido: number, total: number): void {
+  if (montoRecibido < total) {
+    throw new ErrorApi(422, CODIGOS_ERROR.MONTO_INSUFICIENTE, "El monto recibido no cubre el total.", { montoRecibido, total });
+  }
+}
+
+// Implementa Regla 5: una factura anulada no se vuelve a anular, y nunca se borra ni se edita.
+export function asegurarFacturaNoAnulada(estado: "emitida" | "anulada"): void {
+  if (estado === "anulada") {
+    throw new ErrorApi(409, CODIGOS_ERROR.FACTURA_ANULADA, "La factura ya estaba anulada.");
+  }
+}
+
+// Implementa Regla 10: el total de la factura se calcula con BigInt y debe entrar en el entero seguro.
+export function asegurarImporteFacturaDentroDeRango(importeCentavos: bigint): void {
+  if (importeCentavos < 0n || importeCentavos > BigInt(Number.MAX_SAFE_INTEGER)) {
+    throw new ErrorApi(422, CODIGOS_ERROR.VALIDACION, "El importe de la factura supera el máximo permitido.", [
+      { campo: "items", mensaje: "El total debe ser un entero seguro en centavos." },
+    ]);
+  }
+}
