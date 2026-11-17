@@ -6,9 +6,9 @@ import { promisify as convertirEnPromesa } from "node:util";
 import { join as unirRuta } from "node:path";
 import { categorias, facturas, movimientosStock, productos, usuarios, type UsuarioAutenticado } from "@/base-de-datos/esquema";
 import { traducirErrorEscrituraCategoria, traducirErrorEscrituraProducto } from "@/errores/verificadores-negocio";
-import { crearCategoria, actualizarCategoria, listarCategorias } from "@/servicios/servicio-categorias";
-import { crearProducto, actualizarProducto, listarProductos, obtenerProductoPorId } from "@/servicios/servicio-productos";
-import { listarMovimientosProducto, listarMovimientosStockGeneral, moverStock, registrarMovimientoManual } from "@/servicios/servicio-stock";
+import { crearCategoria, actualizarCategoria, listarCategorias, listarCategoriasAdministracion } from "@/servicios/servicio-categorias";
+import { crearProducto, actualizarProducto, listarProductos, obtenerProductoPorId, obtenerFichaProducto, obtenerResumenProductos, listarOpcionesProductos } from "@/servicios/servicio-productos";
+import { listarMovimientosProducto, listarMovimientosStockGeneral, listarMovimientosStockParaPantalla, moverStock, registrarMovimientoManual } from "@/servicios/servicio-stock";
 import { crearBaseDatosPrueba, type BaseDatosPrueba } from "./ayudantes-prueba";
 
 describir("Categorías, productos y stock transaccional", () => {
@@ -35,6 +35,61 @@ describir("Categorías, productos y stock transaccional", () => {
       productoId, movimiento: { tipo, cantidad, motivo: tipo === "ingreso" ? "Reposición" : "Rotura", observacion: "Depósito" },
     }, entorno.bd);
   }
+
+  probar("la ficha calcula centavos exactos y el resumen global no cuenta productos dados de baja", async () => {
+    const producto = await crearProducto(admin, datosProducto({ stockInicial: 3, precio: 101 }), entorno.bd);
+    const inactivo = await crearProducto(admin, datosProducto({ codigo: "BAJA" }), entorno.bd);
+    await actualizarProducto(admin, { id: inactivo.id, cambios: { activo: false } }, entorno.bd);
+    esperar(await obtenerFichaProducto(vendedor, { id: producto.id }, entorno.bd)).toEqual({ producto, valorStock: 303 });
+    esperar(await obtenerResumenProductos(vendedor, {}, entorno.bd)).toEqual({ cantidadProductosActivos: 1 });
+    esperar((await obtenerFichaProducto(vendedor, { id: inactivo.id }, entorno.bd)).producto.activo).toBe(false);
+    await esperar(obtenerFichaProducto(admin, { id: 999 }, entorno.bd)).rejects.toMatchObject({ codigo: "NO_ENCONTRADO" });
+    const enorme = await crearProducto(admin, datosProducto({ codigo: "ENORME", precio: Number.MAX_SAFE_INTEGER, stockInicial: 2 }), entorno.bd);
+    await esperar(obtenerFichaProducto(admin, { id: enorme.id }, entorno.bd)).rejects.toMatchObject({ estadoHttp: 422, codigo: "VALIDACION" });
+  });
+
+  probar("administración incluye categorías inactivas y vacías, contando solo productos activos", async () => {
+    const vacia = await crearCategoria(admin, { nombre: "Temporada" }, entorno.bd);
+    await actualizarCategoria(admin, { id: vacia.id, cambios: { activa: false } }, entorno.bd);
+    await crearProducto(admin, datosProducto(), entorno.bd);
+    const inactivo = await crearProducto(admin, datosProducto({ codigo: "INACTIVO" }), entorno.bd);
+    await actualizarProducto(admin, { id: inactivo.id, cambios: { activo: false } }, entorno.bd);
+    esperar(await listarCategoriasAdministracion(admin, {}, entorno.bd)).toEqual([
+      { id: categoriaId, nombre: "Herramientas", activa: true, cantidadProductosActivos: 1 },
+      { ...vacia, activa: false, cantidadProductosActivos: 0 },
+    ]);
+    esperar(await listarCategorias(vendedor, {}, entorno.bd)).toEqual([{ id: categoriaId, nombre: "Herramientas", activa: true }]);
+    await esperar(listarCategoriasAdministracion(vendedor, {}, entorno.bd)).rejects.toMatchObject({ codigo: "SIN_PERMISO" });
+  });
+
+  probar("el historial de pantalla enriquece producto y observación sin cambiar el JSON REST", async () => {
+    const producto = await crearProducto(admin, datosProducto({ stockInicial: 2 }), entorno.bd);
+    const ingreso = await ajustar(producto.id, "ingreso", 1);
+    await actualizarProducto(admin, { id: producto.id, cambios: { activo: false } }, entorno.bd);
+    const pantalla = await listarMovimientosStockParaPantalla(vendedor, { productoId: producto.id, pageSize: 1 }, entorno.bd);
+    esperar(pantalla.total).toBe(2);
+    esperar(pantalla.data[0]).toMatchObject({ ...ingreso, producto: { ...ingreso.producto, descripcion: "Martillo" }, observacion: "Depósito" });
+    const publico = (await listarMovimientosStockGeneral(vendedor, { productoId: producto.id, pageSize: 1 }, entorno.bd)).data[0];
+    esperar(publico).toEqual(ingreso);
+    esperar(publico).not.toHaveProperty("observacion");
+    esperar(publico.producto).not.toHaveProperty("descripcion");
+    await esperar(listarMovimientosStockParaPantalla(vendedor, { productoId: 999 }, entorno.bd)).rejects.toMatchObject({ codigo: "NO_ENCONTRADO" });
+  });
+
+  probar("opciones paginadas encuentran productos más allá de cien y permiten historial de inactivos", async () => {
+    await entorno.bd.insert(productos).values(Array.from({ length: 105 }, (_, indice) => ({
+      codigo: `OP-${String(indice).padStart(3, "0")}`, descripcion: `Opción ${String(indice).padStart(3, "0")}`, categoriaId, precio: 100,
+    })));
+    const ultima = await listarOpcionesProductos(admin, { uso: "movimiento", page: 11, pageSize: 10 }, entorno.bd);
+    esperar(ultima.total).toBe(105);
+    esperar(ultima.data).toHaveLength(5);
+    const producto = ultima.data[0];
+    await actualizarProducto(admin, { id: producto.id, cambios: { activo: false } }, entorno.bd);
+    esperar((await listarOpcionesProductos(vendedor, { uso: "historial", q: producto.codigo }, entorno.bd)).data).toEqual([{ ...producto, activo: false }]);
+    esperar((await listarOpcionesProductos(admin, { uso: "movimiento", q: producto.codigo }, entorno.bd)).data).toEqual([]);
+    await esperar(listarOpcionesProductos(vendedor, { uso: "movimiento" }, entorno.bd)).rejects.toMatchObject({ codigo: "SIN_PERMISO" });
+    await esperar(listarProductos(vendedor, { activo: "todos" }, entorno.bd)).rejects.toMatchObject({ codigo: "SIN_PERMISO" });
+  });
 
   probar("alta con 15 unidades registra un ingreso y devuelve exactamente el contrato público", async () => {
     const producto = await crearProducto(admin, datosProducto({ stockInicial: 15 }), entorno.bd);

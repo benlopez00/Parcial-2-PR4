@@ -18,6 +18,19 @@ export function formatearMoneda(centavos: number): string {
   return `${importe < 0n ? "-" : ""}$ ${pesos},${decimales}`;
 }
 
+export function formatearCantidadConSigno(cantidad: number): string {
+  if (!Number.isSafeInteger(cantidad)) throw new RangeError("La cantidad debe ser un entero seguro.");
+  return `${cantidad > 0 ? "+" : ""}${formatoEntero.format(cantidad)}`;
+}
+
+export function formatearImporteEditable(centavos: number | null): string {
+  if (centavos === null) return "";
+  if (!Number.isSafeInteger(centavos)) throw new RangeError("El importe debe ser un entero seguro en centavos.");
+  const valor = BigInt(centavos);
+  const absoluto = valor < 0n ? -valor : valor;
+  return `${valor < 0n ? "-" : ""}${absoluto / 100n},${(absoluto % 100n).toString().padStart(2, "0")}`;
+}
+
 /** Acepta pesos numéricos, texto decimal (1234.50) o argentino (1.234,50).
  * Rechaza más de dos decimales: nunca redondea silenciosamente un importe.
  */

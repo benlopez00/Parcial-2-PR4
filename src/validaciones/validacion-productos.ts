@@ -1,7 +1,7 @@
 import { z as esquema } from "zod";
 
-const enteroNoNegativo = esquema.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
-const identificadorCuerpo = esquema.number().int().positive().max(Number.MAX_SAFE_INTEGER);
+const enteroNoNegativo = esquema.number({ error: "Ingresá un número entero no negativo." }).int("Ingresá un número entero.").min(0, "No puede ser negativo.").max(Number.MAX_SAFE_INTEGER);
+const identificadorCuerpo = esquema.number({ error: "Elegí una opción válida." }).int().positive("Elegí una opción.").max(Number.MAX_SAFE_INTEGER);
 const identificadorConsulta = esquema.coerce.number().int().positive().max(Number.MAX_SAFE_INTEGER);
 const textoObligatorio = esquema.string().trim().min(1, "Este campo es obligatorio.");
 const paginacion = {
@@ -38,11 +38,19 @@ export const esquemaActualizarProducto = esquema.object({
 }).strict();
 
 const camposMovimiento = {
-  cantidad: esquema.number().int().positive().max(Number.MAX_SAFE_INTEGER),
+  cantidad: esquema.number({ error: "Ingresá una cantidad." }).int("Ingresá unidades enteras.").positive("La cantidad debe ser mayor que cero.").max(Number.MAX_SAFE_INTEGER),
   observacion: esquema.string().trim().optional(),
 };
-const motivosIngreso = esquema.enum(["Reposición", "Stock inicial", "Devolución de cliente"]);
-const motivosEgreso = esquema.enum(["Rotura", "Vencimiento", "Ajuste de inventario", "Uso interno"]);
+export const opcionesMotivosIngreso = ["Reposición", "Stock inicial", "Devolución de cliente"] as const;
+export const opcionesMotivosEgreso = ["Rotura", "Vencimiento", "Ajuste de inventario", "Uso interno"] as const;
+const motivosIngreso = esquema.enum(opcionesMotivosIngreso, { error: "Elegí un motivo de ingreso." });
+const motivosEgreso = esquema.enum(opcionesMotivosEgreso, { error: "Elegí un motivo de egreso." });
+
+export const esquemaOpcionesProductos = esquema.object({
+  q: esquema.string().trim().default(""),
+  uso: esquema.enum(["movimiento", "historial"]),
+  ...paginacion,
+}).strict();
 
 export const esquemaMovimientoManual = esquema.discriminatedUnion("tipo", [
   esquema.object({ ...camposMovimiento, tipo: esquema.literal("ingreso"), motivo: motivosIngreso }).strict(),

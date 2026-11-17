@@ -14,6 +14,7 @@ export interface OpcionesFormularioAccion<Entrada, Salida, Validado = Entrada> {
 
 export interface EstadoFormularioAccion<Entrada, Salida> {
   enviar: (datos: Entrada) => Promise<ResultadoAccion<Salida> | null>;
+  validarCampos: (datos: Entrada, campos?: readonly string[]) => boolean;
   enviando: boolean;
   erroresPorCampo: ErroresPorCampo;
   errorGeneral: string | null;
@@ -80,6 +81,21 @@ export function usarFormularioAccion<Entrada, Salida, Validado = Entrada>({
     setErrorGeneral(null);
   }, []);
 
+  const validarCampos = React.useCallback((datos: Entrada, campos?: readonly string[]): boolean => {
+    const validacion = esquema.safeParse(datos);
+    const errores = validacion.success ? {} : extraerErroresZod(validacion.error.issues);
+    setErroresPorCampo((anteriores) => {
+      if (!campos) return errores;
+      const siguientes = { ...anteriores };
+      for (const campo of campos) {
+        delete siguientes[campo];
+        if (errores[campo]) siguientes[campo] = errores[campo];
+      }
+      return siguientes;
+    });
+    return validacion.success;
+  }, [esquema]);
+
   const enviar = React.useCallback(
     async (datos: Entrada): Promise<ResultadoAccion<Salida> | null> => {
       if (bloqueadoRef.current) {
@@ -128,6 +144,7 @@ export function usarFormularioAccion<Entrada, Salida, Validado = Entrada>({
 
   return {
     enviar,
+    validarCampos,
     enviando,
     erroresPorCampo,
     errorGeneral,

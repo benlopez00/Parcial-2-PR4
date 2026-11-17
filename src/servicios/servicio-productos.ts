@@ -1,13 +1,14 @@
-import { and as yLogico, asc as ascendente, count as contar, eq as igual, ne as distinto, or as oLogico, sql as expresionSql } from "drizzle-orm";
+import { and as yLogico, asc as ascendente, count as contar, eq as igual, ne as distinto, or as oLogico, sql as expresionSql, type SQL as ExpresionSql } from "drizzle-orm";
 import { bd, type BaseDatos } from "@/base-de-datos/conexion";
 import { categorias, productos, type UsuarioAutenticado } from "@/base-de-datos/esquema";
 import {
   asegurarCategoriaCompatibleConProducto, asegurarCodigoProductoUnico, asegurarFiltroEstadoProductosPermitido,
-  asegurarRecursoExiste, asegurarRolAdmin, asegurarUsuarioAutenticado, traducirErrorEscrituraProducto,
+  asegurarRecursoExiste, asegurarRolAdmin, asegurarUsuarioAutenticado, asegurarValorStockDentroDeRango, traducirErrorEscrituraProducto,
 } from "@/errores/verificadores-negocio";
 import {
-  esquemaActualizarProducto, esquemaCrearProducto, esquemaListadoProductos, esquemaObtenerProducto,
+  esquemaActualizarProducto, esquemaCrearProducto, esquemaListadoProductos, esquemaObtenerProducto, esquemaOpcionesProductos,
 } from "@/validaciones/validacion-productos";
+import { esquemaSinDatos } from "@/validaciones/validacion-autenticacion";
 import { moverStock } from "./servicio-stock";
 import { ejecutarTransaccionEscritura } from "@/utilidades/transacciones";
 
@@ -16,6 +17,10 @@ export interface ProductoPublico {
   precio: number; existencia: number; stockMinimo: number; bajoMinimo: boolean; activo: boolean;
 }
 export interface ListadoProductos { data: ProductoPublico[]; page: number; pageSize: number; total: number }
+export interface ResumenProductos { cantidadProductosActivos: number }
+export interface FichaProducto { producto: ProductoPublico; valorStock: number }
+export type OpcionProducto = Pick<ProductoPublico, "id" | "codigo" | "descripcion" | "existencia" | "activo">;
+export interface ListadoOpcionesProductos { data: OpcionProducto[]; page: number; pageSize: number; total: number }
 
 const columnasProducto = {
   id: productos.id, codigo: productos.codigo, descripcion: productos.descripcion,
@@ -24,20 +29,63 @@ const columnasProducto = {
   bajoMinimo: expresionSql<boolean>`${productos.existencia} < ${productos.stockMinimo}`.mapWith(Boolean),
 };
 
-function minusculasSql(columna: typeof productos.codigo | typeof productos.descripcion) {
+// Implementa RF-P1: la búsqueda contempla mayúsculas y caracteres castellanos.
+function minusculasSql(columna: typeof productos.codigo | typeof productos.descripcion): ExpresionSql {
   return expresionSql`replace(replace(replace(replace(replace(replace(replace(lower(${columna}), 'Á', 'á'), 'É', 'é'), 'Í', 'í'), 'Ó', 'ó'), 'Ú', 'ú'), 'Ü', 'ü'), 'Ñ', 'ñ')`;
+}
+
+// Implementa RF-P1: comparte búsqueda literal por código/descripción entre catálogo y selectores.
+function construirFiltroBusquedaProductos(busqueda: string): ExpresionSql | undefined {
+  if (!busqueda) return undefined;
+  const patron = `%${busqueda.toLowerCase().replaceAll("\\", "\\\\").replaceAll("%", "\\%").replaceAll("_", "\\_")}%`;
+  return oLogico(
+    expresionSql`${minusculasSql(productos.codigo)} LIKE ${patron} ESCAPE '\\'`,
+    expresionSql`${minusculasSql(productos.descripcion)} LIKE ${patron} ESCAPE '\\'`,
+  );
+}
+
+// Implementa RF-P1: el subtítulo cuenta activos en todo el catálogo, sin filtros de pantalla.
+export async function obtenerResumenProductos(usuarioActual: UsuarioAutenticado, datosSinValidar: unknown, baseDatos: BaseDatos = bd): Promise<ResumenProductos> {
+  esquemaSinDatos.parse(datosSinValidar);
+  asegurarUsuarioAutenticado(usuarioActual);
+  const [{ cantidadProductosActivos }] = await baseDatos.select({ cantidadProductosActivos: contar() })
+    .from(productos).where(igual(productos.activo, true));
+  return { cantidadProductosActivos };
+}
+
+// Implementa RF-P1 y Regla 10: la ficha recibe su valoración calculada en el servidor.
+export async function obtenerFichaProducto(usuarioActual: UsuarioAutenticado, datosSinValidar: unknown, baseDatos: BaseDatos = bd): Promise<FichaProducto> {
+  const consulta = esquemaObtenerProducto.parse(datosSinValidar);
+  asegurarUsuarioAutenticado(usuarioActual);
+  const producto = await obtenerProductoPorId(usuarioActual, consulta, baseDatos);
+  const valorCentavos = BigInt(producto.precio) * BigInt(producto.existencia);
+  asegurarValorStockDentroDeRango(valorCentavos);
+  return { producto, valorStock: Number(valorCentavos) };
+}
+
+// Implementa RF-P4 y RF-P6: opciones paginadas, incluyendo inactivos únicamente para consultar historial.
+export async function listarOpcionesProductos(usuarioActual: UsuarioAutenticado, datosSinValidar: unknown, baseDatos: BaseDatos = bd): Promise<ListadoOpcionesProductos> {
+  const consulta = esquemaOpcionesProductos.parse(datosSinValidar);
+  asegurarUsuarioAutenticado(usuarioActual);
+  if (consulta.uso === "movimiento") asegurarRolAdmin(usuarioActual);
+  const filtro = yLogico(
+    consulta.uso === "movimiento" ? igual(productos.activo, true) : undefined,
+    construirFiltroBusquedaProductos(consulta.q),
+  );
+  const [{ total }] = await baseDatos.select({ total: contar() }).from(productos).where(filtro);
+  const data = await baseDatos.select({ id: productos.id, codigo: productos.codigo, descripcion: productos.descripcion,
+    existencia: productos.existencia, activo: productos.activo }).from(productos).where(filtro)
+    .orderBy(ascendente(productos.descripcion), ascendente(productos.id))
+    .limit(consulta.pageSize).offset((consulta.page - 1) * consulta.pageSize);
+  return { data, page: consulta.page, pageSize: consulta.pageSize, total };
 }
 
 // Implementa RF-P1: catálogo filtrado y paginado con indicador de stock bajo mínimo.
 export async function listarProductos(usuarioActual: UsuarioAutenticado, datosSinValidar: unknown, baseDatos: BaseDatos = bd): Promise<ListadoProductos> {
   const consulta = esquemaListadoProductos.parse(datosSinValidar);
   asegurarFiltroEstadoProductosPermitido(usuarioActual, consulta.activo);
-  const patron = `%${consulta.q.toLowerCase().replaceAll("\\", "\\\\").replaceAll("%", "\\%").replaceAll("_", "\\_")}%`;
   const filtro = yLogico(
-    consulta.q ? oLogico(
-      expresionSql`${minusculasSql(productos.codigo)} LIKE ${patron} ESCAPE '\\'`,
-      expresionSql`${minusculasSql(productos.descripcion)} LIKE ${patron} ESCAPE '\\'`,
-    ) : undefined,
+    construirFiltroBusquedaProductos(consulta.q),
     consulta.categoriaId !== undefined ? igual(productos.categoriaId, consulta.categoriaId) : undefined,
     consulta.bajoMinimo === "true" ? expresionSql`${productos.existencia} < ${productos.stockMinimo}` : undefined,
     consulta.activo === "todos" ? undefined : igual(productos.activo, consulta.activo === "true"),

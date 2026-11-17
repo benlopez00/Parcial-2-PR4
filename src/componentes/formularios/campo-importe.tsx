@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Entrada } from "@/componentes/interfaz/entrada";
-import { pesosACentavos } from "@/utilidades/formatos";
+import { formatearImporteEditable, pesosACentavos } from "@/utilidades/formatos";
 import { CampoFormulario } from "./campo-formulario";
 
 export interface PropiedadesCampoImporte {
@@ -16,17 +16,7 @@ export interface PropiedadesCampoImporte {
   obligatorio?: boolean;
   deshabilitado?: boolean;
   placeholder?: string;
-}
-
-function formatearValorInicial(centavos: number | null): string {
-  if (centavos === null) {
-    return "";
-  }
-  const entero = Math.trunc(centavos / 100);
-  const decimales = Math.abs(centavos % 100)
-    .toString()
-    .padStart(2, "0");
-  return `${entero},${decimales}`;
+  alPerderFoco?: () => void;
 }
 
 export function CampoImporte({
@@ -40,18 +30,25 @@ export function CampoImporte({
   obligatorio = false,
   deshabilitado = false,
   placeholder = "0,00",
+  alPerderFoco,
 }: PropiedadesCampoImporte) {
-  const [texto, setTexto] = React.useState(() => formatearValorInicial(valorCentavos));
+  const [texto, setTexto] = React.useState(() => formatearImporteEditable(valorCentavos));
   const [errorFormato, setErrorFormato] = React.useState<string | undefined>(undefined);
+  const ultimoValorEmitido = React.useRef(valorCentavos);
 
   React.useEffect(() => {
-    setTexto(formatearValorInicial(valorCentavos));
+    if (valorCentavos !== ultimoValorEmitido.current) {
+      setTexto(formatearImporteEditable(valorCentavos));
+      setErrorFormato(undefined);
+      ultimoValorEmitido.current = valorCentavos;
+    }
   }, [valorCentavos]);
 
   function manejarCambio(nuevoTexto: string) {
     setTexto(nuevoTexto);
     if (nuevoTexto.trim() === "") {
       setErrorFormato(undefined);
+      ultimoValorEmitido.current = null;
       alCambiarCentavos(null);
       return;
     }
@@ -59,13 +56,16 @@ export function CampoImporte({
     try {
       const centavos = pesosACentavos(nuevoTexto);
       setErrorFormato(undefined);
+      ultimoValorEmitido.current = centavos;
       alCambiarCentavos(centavos);
     } catch {
       setErrorFormato("Ingresá un importe válido (hasta dos decimales).");
+      ultimoValorEmitido.current = null;
+      alCambiarCentavos(null);
     }
   }
 
-  const mensajeError = error ?? errorFormato;
+  const mensajeError = errorFormato ?? error;
 
   return (
     <CampoFormulario
@@ -88,6 +88,7 @@ export function CampoImporte({
           aria-invalid={Boolean(mensajeError)}
           aria-describedby={mensajeError ? `${id}-error` : ayuda ? `${id}-ayuda` : undefined}
           onChange={(evento) => manejarCambio(evento.target.value)}
+          onBlur={alPerderFoco}
           className="pl-7"
         />
       </div>

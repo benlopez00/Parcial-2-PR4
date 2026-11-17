@@ -140,6 +140,15 @@ export function asegurarExistenciaDentroDeRango(existencia: number, variacion: n
   }
 }
 
+// Implementa RF-P1 y Regla 10: la valoración se devuelve en centavos enteros seguros.
+export function asegurarValorStockDentroDeRango(valorCentavos: bigint): void {
+  if (valorCentavos < 0n || valorCentavos > BigInt(Number.MAX_SAFE_INTEGER)) {
+    throw new ErrorApi(422, CODIGOS_ERROR.VALIDACION, "El valor del stock supera el máximo permitido.", [
+      { campo: "valorStock", mensaje: "El valor del stock debe ser un entero seguro en centavos." },
+    ]);
+  }
+}
+
 // Implementa Regla 1: la actualización atómica debe haber modificado el producto.
 export function asegurarStockSuficiente(actualizacionRealizada: boolean, detalle: {
   productoId: number; codigo: string; solicitado: number; disponible: number;

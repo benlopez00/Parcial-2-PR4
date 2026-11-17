@@ -1,4 +1,4 @@
-import { and as yLogico, asc as ascendente, eq as igual, ne as distinto } from "drizzle-orm";
+import { and as yLogico, asc as ascendente, count as contar, eq as igual, ne as distinto } from "drizzle-orm";
 import { bd, type BaseDatos } from "@/base-de-datos/conexion";
 import { categorias, productos, type UsuarioAutenticado } from "@/base-de-datos/esquema";
 import {
@@ -9,7 +9,18 @@ import { esquemaActualizarCategoria, esquemaCrearCategoria, esquemaListadoCatego
 import { ejecutarTransaccionEscritura } from "@/utilidades/transacciones";
 
 export interface CategoriaPublica { id: number; nombre: string; activa: boolean }
+export interface CategoriaAdministrable extends CategoriaPublica { cantidadProductosActivos: number }
 const columnasCategoria = { id: categorias.id, nombre: categorias.nombre, activa: categorias.activa };
+
+// Implementa RF-P7: administración de categorías activas/inactivas y conteo de sus productos activos.
+export async function listarCategoriasAdministracion(usuarioActual: UsuarioAutenticado, datosSinValidar: unknown, baseDatos: BaseDatos = bd): Promise<CategoriaAdministrable[]> {
+  esquemaListadoCategorias.parse(datosSinValidar);
+  asegurarRolAdmin(usuarioActual);
+  const listado = await baseDatos.select({ ...columnasCategoria, cantidadProductosActivos: contar(productos.id) })
+    .from(categorias).leftJoin(productos, yLogico(igual(productos.categoriaId, categorias.id), igual(productos.activo, true)))
+    .groupBy(categorias.id).orderBy(ascendente(categorias.nombre), ascendente(categorias.id));
+  return listado;
+}
 
 // Implementa RF-P7: lista todas las categorías activas sin paginación.
 export async function listarCategorias(usuarioActual: UsuarioAutenticado, datosSinValidar: unknown, baseDatos: BaseDatos = bd): Promise<CategoriaPublica[]> {

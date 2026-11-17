@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef as usarReferencia } from "react";
 import { Boton } from "@/componentes/interfaz/boton";
 import {
   DialogoAlerta,
@@ -34,9 +35,13 @@ export function DialogoConfirmacion({
   pendiente = false,
   alConfirmar,
 }: PropiedadesDialogoConfirmacion) {
+  const focoAnterior = usarReferencia<HTMLElement | null>(null);
   return (
     <DialogoAlerta open={abierto} onOpenChange={(nuevoEstado) => !pendiente && alCambiarAbierto(nuevoEstado)}>
-      <DialogoAlertaContenido>
+      <DialogoAlertaContenido
+        onOpenAutoFocus={() => { focoAnterior.current = document.activeElement as HTMLElement; }}
+        onCloseAutoFocus={(evento) => { evento.preventDefault(); focoAnterior.current?.focus(); }}
+      >
         <DialogoAlertaEncabezado>
           <DialogoAlertaTitulo>{titulo}</DialogoAlertaTitulo>
           <DialogoAlertaDescripcion>{descripcion}</DialogoAlertaDescripcion>

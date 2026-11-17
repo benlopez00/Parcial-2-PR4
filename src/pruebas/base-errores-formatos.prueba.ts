@@ -10,14 +10,27 @@ import {
 import { CODIGOS_ERROR } from "@/errores/codigos-error";
 import { ErrorApi } from "@/errores/error-api";
 import { convertirErrorARespuestaHttp, convertirErrorAResultadoAccion } from "@/errores/manejador-errores";
-import { asegurarRecursoExiste, asegurarRolAdmin } from "@/errores/verificadores-negocio";
+import { asegurarRecursoExiste, asegurarRolAdmin, asegurarValorStockDentroDeRango } from "@/errores/verificadores-negocio";
 import {
   formatearMoneda, pesosACentavos, formatearFecha, formatearHora, formatearFechaHora,
-  formatearNumeroComprobante, formatearNumeroFactura, formatearNumeroRecibo,
+  formatearNumeroComprobante, formatearNumeroFactura, formatearNumeroRecibo, formatearCantidadConSigno, formatearImporteEditable,
 } from "@/utilidades/formatos";
 import { crearBaseDatosPrueba, type BaseDatosPrueba } from "./ayudantes-prueba";
 
 describir("Formatos argentinos y conversión exacta de importes", () => {
+  probar("cantidades con signo e importes editables conservan formato argentino y precisión", () => {
+    esperar(formatearCantidadConSigno(1200)).toBe("+1.200");
+    esperar(formatearCantidadConSigno(-2)).toBe("-2");
+    esperar(formatearCantidadConSigno(0)).toBe("0");
+    esperar(formatearImporteEditable(null)).toBe("");
+    esperar(formatearImporteEditable(-1)).toBe("-0,01");
+    esperar(formatearImporteEditable(1250000)).toBe("12500,00");
+    esperar(pesosACentavos(formatearImporteEditable(Number.MAX_SAFE_INTEGER))).toBe(Number.MAX_SAFE_INTEGER);
+    esperar(() => formatearCantidadConSigno(1.2)).toThrow(RangeError);
+    esperar(() => formatearImporteEditable(Infinity)).toThrow(RangeError);
+    esperar(() => asegurarValorStockDentroDeRango(BigInt(Number.MAX_SAFE_INTEGER))).not.toThrow();
+    esperar(() => asegurarValorStockDentroDeRango(BigInt(Number.MAX_SAFE_INTEGER) + 1n)).toThrow(ErrorApi);
+  });
   probar.each([
     [1250000, "$ 12.500,00"], [0, "$ 0,00"], [1234550, "$ 12.345,50"],
     [1, "$ 0,01"], [-12345, "-$ 123,45"],
