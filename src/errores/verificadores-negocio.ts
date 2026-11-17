@@ -94,3 +94,90 @@ export function asegurarRecursoExiste<T>(
     throw new ErrorApi(404, CODIGOS_ERROR.NO_ENCONTRADO, `No se encontró ${nombreRecurso}.`);
   }
 }
+
+// Implementa RF-P7: el nombre de categoría es único, incluso si está inactiva.
+export function asegurarNombreCategoriaUnico(enUso: boolean): void {
+  if (enUso) throw new ErrorApi(409, CODIGOS_ERROR.NOMBRE_DUPLICADO, "El nombre de categoría ya existe.");
+}
+
+// Implementa RF-P7: una categoría con productos activos no se puede desactivar.
+export function asegurarCategoriaSinProductosActivos(tieneProductosActivos: boolean): void {
+  if (tieneProductosActivos) throw new ErrorApi(409, CODIGOS_ERROR.CATEGORIA_EN_USO, "La categoría tiene productos activos.");
+}
+
+// Implementa RF-P2: el código de producto es único, incluso si está inactivo.
+export function asegurarCodigoProductoUnico(enUso: boolean): void {
+  if (enUso) throw new ErrorApi(409, CODIGOS_ERROR.CODIGO_DUPLICADO, "El código de producto ya existe.");
+}
+
+// Implementa RF-P1: solo admin puede consultar el catálogo de inactivos o todos.
+export function asegurarFiltroEstadoProductosPermitido(usuarioActual: UsuarioAutenticado, activo: "true" | "false" | "todos"): void {
+  asegurarUsuarioAutenticado(usuarioActual);
+  if (activo !== "true") asegurarRolAdmin(usuarioActual);
+}
+
+// Implementa RF-P4, RF-P5 y RF-V9: solo la venta admite al vendedor como operador.
+export function asegurarPermisoMovimientoStock(usuarioActual: UsuarioAutenticado, tipo: "ingreso" | "egreso" | "venta" | "anulacion"): void {
+  asegurarUsuarioAutenticado(usuarioActual);
+  if (tipo !== "venta") asegurarRolAdmin(usuarioActual);
+}
+
+// Implementa RF-P2 y RF-P7: un producto activo requiere una categoría activa.
+export function asegurarCategoriaCompatibleConProducto(categoriaActiva: boolean, productoActivo: boolean): void {
+  if (productoActivo && !categoriaActiva) {
+    throw new ErrorApi(422, CODIGOS_ERROR.VALIDACION, "La categoría debe estar activa.", [
+      { campo: "categoriaId", mensaje: "Elegí una categoría activa." },
+    ]);
+  }
+}
+
+// Implementa Reglas 1 y 10: las existencias permanecen dentro del entero seguro.
+export function asegurarExistenciaDentroDeRango(existencia: number, variacion: number): void {
+  if (BigInt(existencia) + BigInt(variacion) > BigInt(Number.MAX_SAFE_INTEGER)) {
+    throw new ErrorApi(422, CODIGOS_ERROR.VALIDACION, "La existencia supera el máximo permitido.", [
+      { campo: "cantidad", mensaje: "La existencia resultante debe ser un entero seguro." },
+    ]);
+  }
+}
+
+// Implementa Regla 1: la actualización atómica debe haber modificado el producto.
+export function asegurarStockSuficiente(actualizacionRealizada: boolean, detalle: {
+  productoId: number; codigo: string; solicitado: number; disponible: number;
+}): void {
+  if (!actualizacionRealizada) {
+    throw new ErrorApi(409, CODIGOS_ERROR.STOCK_INSUFICIENTE, "No hay stock suficiente.", detalle);
+  }
+}
+
+// Implementa RF-P2 y RF-P7: reconoce solo la restricción única solicitada, también en causas encapsuladas.
+function esColisionUnica(error: unknown, columna: string, indice: string): boolean {
+  let actual: unknown = error;
+  for (let profundidad = 0; profundidad < 8 && actual && typeof actual === "object"; profundidad += 1) {
+    if ("message" in actual && typeof actual.message === "string" &&
+      (actual.message.includes(`UNIQUE constraint failed: ${columna}`) || actual.message.includes(indice))) return true;
+    actual = "cause" in actual ? actual.cause : null;
+  }
+  return false;
+}
+
+// Implementa RF-P7: traduce la colisión del nombre ante escrituras concurrentes.
+export function traducirErrorEscrituraCategoria(error: unknown): never {
+  asegurarNombreCategoriaUnico(esColisionUnica(error, "categorias.nombre", "categorias_nombre_unique"));
+  throw error;
+}
+
+// Implementa RF-P2: traduce la colisión del código ante escrituras concurrentes.
+export function traducirErrorEscrituraProducto(error: unknown): never {
+  asegurarCodigoProductoUnico(esColisionUnica(error, "productos.codigo", "productos_codigo_unique"));
+  throw error;
+}
+
+// Implementa Regla 1: distingue contención transitoria de SQLite de un rechazo de negocio.
+export function esBloqueoTransitorioSqlite(error: unknown): boolean {
+  let actual: unknown = error;
+  for (let profundidad = 0; profundidad < 8 && actual && typeof actual === "object"; profundidad += 1) {
+    if ("code" in actual && (actual.code === "SQLITE_BUSY" || actual.code === "SQLITE_BUSY_SNAPSHOT" || actual.code === "TRANSACTION_ACTIVE")) return true;
+    actual = "cause" in actual ? actual.cause : null;
+  }
+  return false;
+}

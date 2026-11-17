@@ -10,6 +10,7 @@ export function crearConexionBaseDatos(configuracion: ConfiguracionConexion) {
 }
 
 export type BaseDatos = ReturnType<typeof crearConexionBaseDatos>["bd"];
+export type TransaccionBaseDatos = Parameters<Parameters<BaseDatos["transaction"]>[0]>[0];
 
 const conexion = crearConexionBaseDatos({
   url: process.env.DATABASE_URL || "file:./local.db",
