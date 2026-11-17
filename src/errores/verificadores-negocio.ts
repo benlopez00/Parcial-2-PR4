@@ -208,3 +208,26 @@ export function traducirErrorEscrituraCliente(error: unknown): never {
   asegurarDocumentoClienteUnico(esColisionUnica(error, "clientes.nro_doc", "clientes_documento_unico"));
   throw error;
 }
+
+// Implementa RF-C5: a un cliente dado de baja tampoco se le permite operar en cuenta corriente.
+export function asegurarClienteActivo(cliente: { activo: boolean }): void {
+  if (!cliente.activo) {
+    throw new ErrorApi(422, CODIGOS_ERROR.CUENTA_CORRIENTE_NO_HABILITADA, "El cliente está dado de baja.");
+  }
+}
+
+// Implementa RF-C5 y Regla 6: la cuenta corriente solo opera con clientes habilitados.
+export function asegurarCuentaCorrienteHabilitada(cliente: { cuentaCorriente: boolean }): void {
+  if (!cliente.cuentaCorriente) {
+    throw new ErrorApi(422, CODIGOS_ERROR.CUENTA_CORRIENTE_NO_HABILITADA, "El cliente no tiene cuenta corriente habilitada.");
+  }
+}
+
+// Implementa RF-C5 y Regla 8: un pago nunca supera la deuda; con deuda cero cualquier pago la supera.
+export function asegurarPagoNoSuperaDeuda(importe: number, saldoActual: number): void {
+  if (importe > saldoActual) {
+    throw new ErrorApi(422, CODIGOS_ERROR.PAGO_SUPERA_DEUDA, "El pago supera la deuda del cliente.", {
+      importe, saldoActual: Math.max(saldoActual, 0),
+    });
+  }
+}

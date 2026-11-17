@@ -99,3 +99,6 @@ export function formatearNumeroFactura(puntoVenta: number, numero: number): stri
 export function formatearNumeroRecibo(puntoVenta: number, numero: number): string {
   return `R ${formatearNumeroComprobante(puntoVenta, numero)}`;
 }
+
+// Implementa Regla 4: punto de venta único del comercio; facturas y recibos lo comparten.
+export const PUNTO_VENTA_ACTUAL = 1;

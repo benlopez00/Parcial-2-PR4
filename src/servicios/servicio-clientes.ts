@@ -1,4 +1,4 @@
-import { and as yLogico, asc as ascendente, count as contar, desc as descendente, eq as igual, ne as distinto, or as oLogico, sql as expresionSql, type SQL as ExpresionSql } from "drizzle-orm";
+import { and as yLogico, asc as ascendente, count as contar, desc as descendente, eq as igual, lt as menor, lte as menorOIgual, ne as distinto, or as oLogico, sql as expresionSql, type SQL as ExpresionSql } from "drizzle-orm";
 import { bd, type BaseDatos, type TransaccionBaseDatos } from "@/base-de-datos/conexion";
 import { clientes, facturas, movimientosCuenta, type UsuarioAutenticado } from "@/base-de-datos/esquema";
 import {
@@ -70,14 +70,28 @@ function construirFiltroBusquedaClientes(busqueda: string): ExpresionSql | undef
   return oLogico(...condiciones);
 }
 
-// Regla 7: única fuente de verdad del saldo, compartida con T06 (pagos) y T08 (facturación).
+// Regla 7: única fuente de verdad del saldo. La usan T06 (pagos) y T08 (facturación),
+// y es la misma fórmula que la subconsulta `saldoSql`: nunca se escribe una segunda.
+// El "corte" opcional permite mirar el saldo en un momento del pasado, sin duplicar la cuenta:
+//   - antesDe: saldo acumulado ANTES de ese instante, para el saldoAnterior del estado de cuenta.
+//   - hastaMovimiento: saldo INCLUYENDO ese movimiento, para congelar el saldo que imprime un recibo.
+// El orden del historial es (fecha, id), así que el corte por movimiento compara ambos campos.
 export async function calcularSaldoCliente(
   baseDatos: BaseDatos | TransaccionBaseDatos,
   clienteId: number,
+  corte?: { antesDe?: string; hastaMovimiento?: { fecha: string; id: number } },
 ): Promise<number> {
+  const hasta = corte?.hastaMovimiento;
   const [fila] = await baseDatos.select({
     saldo: expresionSql<number>`coalesce(sum(case when ${movimientosCuenta.tipo} = 'debito' then ${movimientosCuenta.importe} else -${movimientosCuenta.importe} end), 0)`.mapWith(Number),
-  }).from(movimientosCuenta).where(igual(movimientosCuenta.clienteId, clienteId));
+  }).from(movimientosCuenta).where(yLogico(
+    igual(movimientosCuenta.clienteId, clienteId),
+    corte?.antesDe ? menor(movimientosCuenta.fecha, corte.antesDe) : undefined,
+    hasta ? oLogico(
+      menor(movimientosCuenta.fecha, hasta.fecha),
+      yLogico(igual(movimientosCuenta.fecha, hasta.fecha), menorOIgual(movimientosCuenta.id, hasta.id)),
+    ) : undefined,
+  ));
   return fila?.saldo ?? 0;
 }
 
