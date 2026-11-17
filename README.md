@@ -20,18 +20,18 @@ El desarrollo se divide en **3 bloques consecutivos de 4 tickets cada uno (12 ti
 
 | Ticket | Responsable | Hito | Descripción | Estado |
 | :--- | :--- | :--- | :--- | :--- |
-| [T01](./tickets/T01-base-datos-errores-y-formatos/ticket.md) | Integrante 1 | Hito 1 | Base de datos (Drizzle + SQLite/Turso), las 9 tablas en `esquema.ts`, migraciones, formatos y arquitectura de errores. | Pendiente |
-| [T02](./tickets/T02-autenticacion-layout-y-usuarios/ticket.md) | Integrante 1 | Hito 1 | Sesión en cookie `httpOnly`, permisos por rol, Layout general, componentes base y módulo completo de Acceso y Usuarios. | Pendiente |
-| [T03](./tickets/T03-backend-categorias-productos-y-stock/ticket.md) | Integrante 1 | Hito 1 | Servicios, validaciones Zod, verificadores de error, pruebas y API REST de Categorías, Productos y `moverStock()`. | Pendiente |
-| [T04](./tickets/T04-frontend-productos-categorias-y-existencias/ticket.md) | Integrante 1 | Hito 1 | Pantallas de Catálogo, Existencias/Movimientos, Ficha de producto, Categorías y modales de stock. | Pendiente |
-| [T05](./tickets/T05-backend-clientes/ticket.md) | Integrante 2 | Hito 2 | Servicios, validaciones Zod, verificadores de error, pruebas y API REST de Clientes (alta, edición, baja lógica y saldos). | Pendiente |
-| [T06](./tickets/T06-backend-cuenta-corriente-y-pagos/ticket.md) | Integrante 2 | Hito 2 | Servicios, validaciones Zod, pruebas y API REST de Cuenta Corriente y Pagos con recibo numerado en transacción. | Pendiente |
-| [T07](./tickets/T07-frontend-clientes-cuenta-y-pagos/ticket.md) | Integrante 2 | Hito 2 | Pantallas de Clientes, Ficha, Cuenta Corriente, Saldos, modal de Pago y vista imprimible de Recibo. | Pendiente |
-| [T08](./tickets/T08-backend-facturacion-y-anulacion/ticket.md) | Integrante 2 | Hito 3 | Servicios, validaciones Zod, pruebas y API REST de Facturación (`confirmarFactura` atómica y `anularFactura`). | Pendiente |
-| [T09](./tickets/T09-frontend-nueva-venta/ticket.md) | Integrante 3 | Hito 3 | Pantalla de Nueva Venta (`/ventas/nueva`) operable con teclado, alta rápida de cliente en modal y las 3 formas de pago. | Pendiente |
-| [T10](./tickets/T10-frontend-listado-detalle-y-anulacion-facturas/ticket.md) | Integrante 3 | Hito 3 | Pantallas de Listado de Facturas (`/ventas`), Comprobante imprimible (`/ventas/[id]`) y modal de Anulación. | Pendiente |
-| [T11](./tickets/T11-tablero-inicio-y-graficos/ticket.md) | Integrante 3 | Hito 4 | Servicio, API (`GET /api/tablero`) y Pantalla del Tablero de Inicio (`/`) con indicadores y gráficos Chart.js. | Pendiente |
-| [T12](./tickets/T12-semilla-pruebas-y-despliegue/ticket.md) | Integrante 3 | Hito 4 | Script de datos de prueba (`semilla.ts`), pruebas integrales y despliegue en Vercel + Turso. | Pendiente |
+| [T01](./docs/tickets/T01-base-datos-errores-y-formatos/ticket.md) | Integrante 1 | Hito 1 | Base de datos (Drizzle + SQLite/Turso), las 9 tablas en `esquema.ts`, migraciones, formatos y arquitectura de errores. | Completado |
+| [T02](./docs/tickets/T02-autenticacion-layout-y-usuarios/ticket.md) | Integrante 1 | Hito 1 | Sesión en cookie `httpOnly`, permisos por rol, Layout general, componentes base y módulo completo de Acceso y Usuarios. | Pendiente |
+| [T03](./docs/tickets/T03-backend-categorias-productos-y-stock/ticket.md) | Integrante 1 | Hito 1 | Servicios, validaciones Zod, verificadores de error, pruebas y API REST de Categorías, Productos y `moverStock()`. | Pendiente |
+| [T04](./docs/tickets/T04-frontend-productos-categorias-y-existencias/ticket.md) | Integrante 1 | Hito 1 | Pantallas de Catálogo, Existencias/Movimientos, Ficha de producto, Categorías y modales de stock. | Pendiente |
+| [T05](./docs/tickets/T05-backend-clientes/ticket.md) | Integrante 2 | Hito 2 | Servicios, validaciones Zod, verificadores de error, pruebas y API REST de Clientes (alta, edición, baja lógica y saldos). | Pendiente |
+| [T06](./docs/tickets/T06-backend-cuenta-corriente-y-pagos/ticket.md) | Integrante 2 | Hito 2 | Servicios, validaciones Zod, pruebas y API REST de Cuenta Corriente y Pagos con recibo numerado en transacción. | Pendiente |
+| [T07](./docs/tickets/T07-frontend-clientes-cuenta-y-pagos/ticket.md) | Integrante 2 | Hito 2 | Pantallas de Clientes, Ficha, Cuenta Corriente, Saldos, modal de Pago y vista imprimible de Recibo. | Pendiente |
+| [T08](./docs/tickets/T08-backend-facturacion-y-anulacion/ticket.md) | Integrante 2 | Hito 3 | Servicios, validaciones Zod, pruebas y API REST de Facturación (`confirmarFactura` atómica y `anularFactura`). | Pendiente |
+| [T09](./docs/tickets/T09-frontend-nueva-venta/ticket.md) | Integrante 3 | Hito 3 | Pantalla de Nueva Venta (`/ventas/nueva`) operable con teclado, alta rápida de cliente en modal y las 3 formas de pago. | Pendiente |
+| [T10](./docs/tickets/T10-frontend-listado-detalle-y-anulacion-facturas/ticket.md) | Integrante 3 | Hito 3 | Pantallas de Listado de Facturas (`/ventas`), Comprobante imprimible (`/ventas/[id]`) y modal de Anulación. | Pendiente |
+| [T11](./docs/tickets/T11-tablero-inicio-y-graficos/ticket.md) | Integrante 3 | Hito 4 | Servicio, API (`GET /api/tablero`) y Pantalla del Tablero de Inicio (`/`) con indicadores y gráficos Chart.js. | Pendiente |
+| [T12](./docs/tickets/T12-semilla-pruebas-y-despliegue/ticket.md) | Integrante 3 | Hito 4 | Script de datos de prueba (`semilla.ts`), pruebas integrales y despliegue en Vercel + Turso. | Pendiente |
 
 ---
 
@@ -39,17 +39,17 @@ El desarrollo se divide en **3 bloques consecutivos de 4 tickets cada uno (12 ti
 
 Todo el proyecto está diseñado para que **cualquier integrante pueda leer, explicar y modificar cualquier archivo en menos de un minuto durante la defensa individual**.
 
-Para resolver cada ticket se siguen **3 pasos estrictos** usando las plantillas de la carpeta [`prompts/`](./prompts/):
+Para resolver cada ticket se siguen **3 pasos estrictos** usando las plantillas de la carpeta [`docs/prompts/`](./docs/prompts/):
 
-1. **Planificación ([`prompts/01-planificacion.md`](./prompts/01-planificacion.md)):**
+1. **Planificación ([`docs/prompts/01-planificacion.md`](./docs/prompts/01-planificacion.md)):**
    - El agente lee [`AGENTS.md`](./AGENTS.md), el `ticket.md` y las capturas de referencia en [`docs/pantallas/`](./docs/pantallas/INDICE.md).
-   - Guarda el plan técnico en `tickets/TXX-.../plan.md` (con los archivos a crear/modificar, nombres en castellano y reglas de negocio involucradas) para que pueda ser leído por cualquier IA de cualquier proveedor.
-2. **Desarrollo ([`prompts/02-desarrollo.md`](./prompts/02-desarrollo.md)):**
+   - Guarda el plan técnico en `docs/tickets/TXX-.../plan.md` (con los archivos a crear/modificar, nombres en castellano y reglas de negocio involucradas) para que pueda ser leído por cualquier IA de cualquier proveedor.
+2. **Desarrollo ([`docs/prompts/02-desarrollo.md`](./docs/prompts/02-desarrollo.md)):**
    - Pensado para ejecutarse en un **modelo más económico en tokens** (o en otro proveedor de IA), leyendo directamente `plan.md`.
    - Implementa el código respetando la separación estricta: flujo normal en `src/servicios/`, control de errores en `src/errores/`, esquemas Zod en `src/validaciones/` y tests en `src/pruebas/`.
-3. **Auditoría y Defensa ([`prompts/03-auditoria-y-defensa.md`](./prompts/03-auditoria-y-defensa.md)):**
+3. **Auditoría y Defensa ([`docs/prompts/03-auditoria-y-defensa.md`](./docs/prompts/03-auditoria-y-defensa.md)):**
    - Audita el código contra [`AGENTS.md`](./AGENTS.md) y ejecuta las pruebas.
-   - Genera el informe para el desarrollador en `tickets/TXX-.../informe-auditoria.md`.
+   - Genera el informe para el desarrollador en `docs/tickets/TXX-.../informe-auditoria.md`.
    - Completa las respuestas correspondientes en [`respuestas-defensa.md`](./respuestas-defensa.md) con rutas y funciones exactas.
 
 ### Flujo de Ramas en Git
@@ -60,6 +60,35 @@ Para resolver cada ticket se siguen **3 pasos estrictos** usando las plantillas 
 ---
 
 ## 4. Puesta en Marcha Local
+
+### Estado al terminar T01
+
+La infraestructura de base de datos, errores y formatos está implementada. La ruta `/` es un arranque vacío; las pantallas y la autenticación corresponden a los próximos tickets.
+
+Para verificar T01 (Node.js 26.1.0 y pnpm 11.8.0 usados en desarrollo):
+
+```powershell
+pnpm install --frozen-lockfile
+Copy-Item .env.example .env
+pnpm run db:migrate
+pnpm test
+pnpm run verificar:tipos
+pnpm run build
+pnpm run dev
+```
+
+- Sin `DATABASE_URL` se usa `file:./local.db`. Para Turso, configurar `DATABASE_URL=libsql://...` y `DATABASE_AUTH_TOKEN` en `.env`.
+- `SESSION_SECRET` queda vacío en el ejemplo: debe reemplazarse por un secreto aleatorio antes de habilitar sesiones en T02.
+- `db:seed` queda reservado para `src/base-de-datos/semilla.ts`, que se implementará en T12 usando los servicios. Los usuarios de prueba de abajo todavía no están cargados.
+- Para cambios del esquema: editar `src/base-de-datos/esquema.ts`, ejecutar `pnpm run db:generate -- --name=descripcion_del_cambio`, revisar y versionar el SQL y sus metadatos, y aplicar `pnpm run db:migrate`.
+- Los scripts usan Webpack: en el entorno Windows/Node.js de desarrollo, Turbopack falló al iniciar el proceso de transformación de CSS. El build con Webpack fue verificado.
+- shadcn/ui queda configurado en `components.json`; los componentes propios se nombrarán en castellano. `src/utilidades/clases.ts` ofrece `combinarEstilos` y el alias `cn` que espera su generador.
+- Los formatos usan la zona `America/Argentina/Buenos_Aires`. `pesosACentavos` acepta números, texto decimal (`1234.50`) y texto argentino (`1.234,50`); rechaza más de dos decimales y valores fuera del entero seguro. En texto, `1.234` se interpreta como mil doscientos treinta y cuatro pesos.
+- Las pruebas aplican las migraciones reales a bases SQLite en memoria independientes. La conexión remota requiere credenciales de Turso; en T01 se verificó SQLite local.
+
+Referencias técnicas: [Drizzle y Turso](https://orm.drizzle.team/docs/get-started/turso-new), [Tailwind con Next.js](https://tailwindcss.com/docs/installation/framework-guides/nextjs) y [configuración manual de shadcn/ui](https://ui.shadcn.com/docs/installation/manual).
+
+### Puesta en marcha completa prevista para T12
 
 El sistema levanta localmente con los siguientes comandos (sin pasos manuales adicionales):
 

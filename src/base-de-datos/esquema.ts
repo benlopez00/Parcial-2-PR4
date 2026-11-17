@@ -183,7 +183,7 @@ export const movimientosCuenta = tablaSqlite("movimientos_cuenta", {
 }, (tabla) => [
   indice("movimientos_cuenta_cliente_fecha_indice").on(tabla.clienteId, tabla.fecha),
   restriccion("movimientos_cuenta_tipo_valido", expresionSql`${tabla.tipo} IN ('debito', 'credito')`),
-  restriccion("movimientos_cuenta_importe_valido", importeValido(tabla.importe)),
+  restriccion("movimientos_cuenta_importe_valido", expresionSql`(${importeValido(tabla.importe)}) AND ${tabla.importe} > 0`),
   restriccion("movimientos_cuenta_origen_unico", expresionSql`(${tabla.facturaId} IS NOT NULL AND ${tabla.pagoId} IS NULL) OR (${tabla.facturaId} IS NULL AND ${tabla.pagoId} IS NOT NULL)`),
 ]);
 

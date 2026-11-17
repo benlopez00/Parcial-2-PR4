@@ -1,7 +1,7 @@
 # Guía de Respuestas para la Defensa Oral (`docs/README.md`)
 
 Este archivo reúne **todas las preguntas y ejercicios de modificación en vivo** de [`docs/README.md`](./docs/README.md).
-- Al cerrar cada ticket con el **Prompt 3 (`prompts/03-auditoria-y-defensa.md`)**, se completan aquí las rutas exactas de archivos, nombres de funciones y líneas del código implementado.
+- Al cerrar cada ticket con el **Prompt 3 (`docs/prompts/03-auditoria-y-defensa.md`)**, se completan aquí las rutas exactas de archivos, nombres de funciones y líneas del código implementado.
 
 ---
 
@@ -9,18 +9,18 @@ Este archivo reúne **todas las preguntas y ejercicios de modificación en vivo*
 
 ### P1.1 — ¿Dónde se definen las tablas de la base de datos?
 - **Ticket asociado:** `T01`
-- **Archivo y función/línea:** `src/base-de-datos/esquema.ts` *(pendiente de auditar en T01)*
-- **Respuesta para la defensa:** Todas las 9 tablas (`usuarios`, `categorias`, `productos`, `movimientos_stock`, `clientes`, `facturas`, `factura_items`, `pagos`, `movimientos_cuenta`) se definen en un único archivo centralizado usando `sqliteTable` de Drizzle ORM.
+- **Archivo y función/línea:** [`src/base-de-datos/esquema.ts`](file:///c:/Proyectos/Parcial-2-PR4/src/base-de-datos/esquema.ts#L23-L188) → constantes exportadas `usuarios` (L23), `categorias` (L36), `productos` (L43), `clientes` (L61), `facturas` (L81), `facturaItems` (L117), `movimientosStock` (L134), `pagos` (L153) y `movimientosCuenta` (L173).
+- **Respuesta para la defensa:** Las 9 tablas se definen en un único archivo centralizado (`src/base-de-datos/esquema.ts`) usando `sqliteTable` (`tablaSqlite`) de Drizzle ORM. Cada tabla incluye `id` autoincremental, `fecha_creacion` en ISO UTC, claves foráneas, índices de búsqueda/unicidad y restricciones `CHECK` en SQLite (como `importeValido()` en la línea 19) además de los tipos TypeScript inferidos en las líneas 190–208.
 
 ### P1.2 — ¿Dónde se conecta la aplicación con la base de datos? ¿Cómo sabe si usar la base local o la de Turso?
 - **Ticket asociado:** `T01`
-- **Archivo y función/línea:** `src/base-de-datos/conexion.ts` *(pendiente de auditar en T01)*
-- **Respuesta para la defensa:** La conexión se instancia en `src/base-de-datos/conexion.ts` con `@libsql/client` y `drizzle()`. Lee la variable de entorno `DATABASE_URL`: en desarrollo apunta a un archivo local (`file:./local.db`) y en producción en Vercel apunta a la URL `libsql://...` de Turso autenticada con `DATABASE_AUTH_TOKEN`.
+- **Archivo y función/línea:** [`src/base-de-datos/conexion.ts`](file:///c:/Proyectos/Parcial-2-PR4/src/base-de-datos/conexion.ts#L6-L20) → función `crearConexionBaseDatos()` (L6) e instancia exportada `bd` (L19).
+- **Respuesta para la defensa:** La conexión se crea en `src/base-de-datos/conexion.ts` mediante `@libsql/client` y `drizzle()`. En las líneas 14–17 evalúa `process.env.DATABASE_URL`: si no está definida o apunta a `file:./local.db`, abre el archivo SQLite local para desarrollo; en producción (Vercel) recibe la URL `libsql://...` de Turso junto con `process.env.DATABASE_AUTH_TOKEN`, sin cambiar una sola línea de código en los servicios.
 
 ### P1.3 — ¿Cómo se crea una tabla nueva o se agrega un campo? ¿Qué es una migración y dónde están?
 - **Ticket asociado:** `T01`
-- **Archivo y función/línea:** `src/base-de-datos/esquema.ts` y carpeta `src/base-de-datos/migraciones/` *(pendiente de auditar en T01)*
-- **Respuesta para la defensa:** Primero se edita `src/base-de-datos/esquema.ts` agregando la tabla o columna. Luego se genera y aplica la migración con `drizzle-kit` (`pnpm run db:migrate`). Una migración es un archivo SQL versionado que transforma la estructura de la base de datos de un estado al siguiente de forma reproducible tanto en local como en Turso.
+- **Archivo y función/línea:** [`src/base-de-datos/esquema.ts`](file:///c:/Proyectos/Parcial-2-PR4/src/base-de-datos/esquema.ts), [`drizzle.config.ts`](file:///c:/Proyectos/Parcial-2-PR4/drizzle.config.ts#L4-L12) y carpeta [`src/base-de-datos/migraciones/0000_inicial.sql`](file:///c:/Proyectos/Parcial-2-PR4/src/base-de-datos/migraciones/0000_inicial.sql).
+- **Respuesta para la defensa:** Primero se declara la tabla o columna en `src/base-de-datos/esquema.ts`. Luego se ejecuta `pnpm run db:generate` para que `drizzle-kit` (configurado en `drizzle.config.ts`) genere el archivo SQL versionado dentro de `src/base-de-datos/migraciones/`, y finalmente se aplica con `pnpm run db:migrate`. Una migración es un script SQL versionado que permite evolucionar y reproducir exactamente la estructura de tablas, índices y restricciones tanto en una base local limpia como en Turso o en los tests en memoria (`crearBaseDatosPrueba()` en `src/pruebas/ayudantes-prueba.ts`).
 
 ### P1.4 — ¿Dónde se cargan los datos de prueba?
 - **Ticket asociado:** `T12`
@@ -29,8 +29,8 @@ Este archivo reúne **todas las preguntas y ejercicios de modificación en vivo*
 
 ### P1.5 — ¿Cómo se guardan los importes? ¿Por qué no se usan números con coma flotante?
 - **Ticket asociado:** `T01`
-- **Archivo y función/línea:** `src/base-de-datos/esquema.ts` y `src/utilidades/formatos.ts` *(pendiente de auditar en T01)*
-- **Respuesta para la defensa:** Se guardan como **números enteros en centavos** (`integer` en SQLite; por ejemplo `$ 12.500,00` se guarda como `1250000`). No se usa coma flotante (`float`/`double`) porque la representación binaria IEEE 754 introduce errores de redondeo (ej. `0.1 + 0.2 = 0.30000000000000004`), lo que haría descuadrar los saldos de cuenta corriente y totales de facturas.
+- **Archivo y función/línea:** [`src/base-de-datos/esquema.ts`](file:///c:/Proyectos/Parcial-2-PR4/src/base-de-datos/esquema.ts#L19-L21) → función `importeValido()` (L19) y columnas `entero(...)`; [`src/utilidades/formatos.ts`](file:///c:/Proyectos/Parcial-2-PR4/src/utilidades/formatos.ts#L10-L49) → funciones `formatearMoneda()` (L10) y `pesosACentavos()` (L24).
+- **Respuesta para la defensa:** Se guardan siempre como **números enteros en centavos** (`integer` en SQLite, validado además por el `CHECK` `typeof(columna) = 'integer'` de `importeValido()`). Por ejemplo, `$ 12.500,00` se almacena y transmite como `1250000`. No se usa coma flotante (`REAL`/`FLOAT`) porque la representación binaria IEEE 754 produce errores de redondeo (como `0.1 + 0.2 = 0.30000000000000004`), lo que haría descuadrar los totales de facturas y los saldos de cuenta corriente. La conversión en `pesosACentavos()` y `formatearMoneda()` opera con `BigInt` sobre la parte entera y decimal para evitar cualquier imprecisión.
 
 ### P1.6 — ¿La existencia de un producto se guarda o se calcula? ¿Y el saldo de un cliente?
 - **Ticket asociado:** `T03` (existencia) y `T05`/`T06` (saldo de cliente)
@@ -78,8 +78,8 @@ Este archivo reúne **todas las preguntas y ejercicios de modificación en vivo*
 
 ### P2.5 — ¿Dónde se arma la respuesta de error que devuelve la API?
 - **Ticket asociado:** `T01`
-- **Archivo y función/línea:** `src/errores/manejador-errores.ts` *(pendiente de auditar en T01)*
-- **Respuesta para la defensa:** En un único lugar centralizado: `src/errores/manejador-errores.ts`. Esa función atrapa tanto instancias de `ErrorApi` como errores de validación `ZodError` y los transforma en `{ error: { code, message, details } }` con su código de estado HTTP correspondiente.
+- **Archivo y función/línea:** [`src/errores/manejador-errores.ts`](file:///c:/Proyectos/Parcial-2-PR4/src/errores/manejador-errores.ts#L21-L62) → funciones `normalizarError()` (L21), `convertirErrorARespuestaHttp()` (L55) y `convertirErrorAResultadoAccion()` (L60), apoyadas en [`src/errores/error-api.ts`](file:///c:/Proyectos/Parcial-2-PR4/src/errores/error-api.ts#L6-L16) (`ErrorApi`) y [`src/errores/codigos-error.ts`](file:///c:/Proyectos/Parcial-2-PR4/src/errores/codigos-error.ts#L1-L26) (`CODIGOS_ERROR`).
+- **Respuesta para la defensa:** En un único lugar centralizado: `src/errores/manejador-errores.ts`. La función `normalizarError()` atrapa instancias de `ErrorApi` (respetando su `estadoHttp`, `codigo`, `mensaje` y `detalles`), errores de validación `ZodError` (transformándolos en `422 VALIDACION` con `details: [{ campo, mensaje }]`, incluyendo campos rechazados por `.strict()`), errores de parseo JSON (`SyntaxError` → `400 JSON_INVALIDO`) y cualquier fallo inesperado (`500 ERROR_INTERNO`, registrando el error real en `console.error` sin exponer detalles internos al cliente).
 
 ### P2.6 — ¿Por qué el cliente no envía el precio ni el total al crear una factura?
 - **Ticket asociado:** `T08` y `T09`
@@ -184,8 +184,8 @@ Este archivo reúne **todas las preguntas y ejercicios de modificación en vivo*
 
 ### P5.2 — ¿Dónde se da formato a los importes y a las fechas?
 - **Ticket asociado:** `T01`
-- **Archivo y función/línea:** `src/utilidades/formatos.ts` *(pendiente de auditar en T01)*
-- **Respuesta para la defensa:** En el módulo único `src/utilidades/formatos.ts`, que convierte centavos enteros a pesos con formato argentino (`$ 12.345,50`) y fechas ISO UTC a formato local `dd/mm/aaaa` en zona horaria `America/Argentina/Buenos_Aires`.
+- **Archivo y función/línea:** [`src/utilidades/formatos.ts`](file:///c:/Proyectos/Parcial-2-PR4/src/utilidades/formatos.ts#L10-L88) → funciones `formatearMoneda()` (L10), `pesosACentavos()` (L24), `formatearFecha()` (L62), `formatearHora()` (L66), `formatearFechaHora()` (L70), `formatearNumeroComprobante()` (L74), `formatearNumeroFactura()` (L82) y `formatearNumeroRecibo()` (L86).
+- **Respuesta para la defensa:** En el módulo único `src/utilidades/formatos.ts`. `formatearMoneda()` convierte centavos enteros a pesos con formato argentino (`$ 12.345,50`) usando `BigInt` e `Intl.NumberFormat("es-AR")`; `formatearFecha()`, `formatearHora()` y `formatearFechaHora()` convierten fechas ISO UTC a formato local (`dd/mm/aaaa` y `HH:mm`) fijando la zona horaria `America/Argentina/Buenos_Aires` (y preservando fechas calendario `AAAA-MM-DD` sin corrimiento por UTC-3); y `formatearNumeroFactura()` / `formatearNumeroRecibo()` aplican el relleno a `0001-00001233` y `R 0001-00000341`.
 
 ### P5.3 — ¿Dónde se validan los datos de un formulario? ¿Se usan las mismas reglas en el servidor?
 - **Ticket asociado:** `T02`, `T04`, `T07`, `T09`
@@ -223,7 +223,7 @@ Este archivo reúne **todas las preguntas y ejercicios de modificación en vivo*
 ### P6.4 — ¿Qué agente usaron y para qué partes del sistema? Muestren algo que el agente hizo mal y cómo lo corrigieron.
 - **Ticket asociado:** Todos (`T01` a `T12`)
 - **Registro de errores detectados y corregidos en auditorías:**
-  - *(Cada vez que el Prompt 3 de Auditoría detecta un desvío o corrección en un ticket, lo documenta aquí y en `informe-auditoria.md` para tener ejemplos reales listos para mostrar en la defensa).*
+  - **T01 (`src/base-de-datos/esquema.ts`, línea 186):** Al definir las restricciones `CHECK` de las 9 tablas, el agente aplicó `importeValido(tabla.importe)` (que permite `>= 0`) sobre `movimientos_cuenta.importe`, mientras que en `pagos.importe` sí había exigido `> 0`. Esto permitía insertar movimientos de cuenta corriente con importe `0` en la base de datos. Durante la auditoría de T01 lo detectamos y corregimos en `src/base-de-datos/esquema.ts` (`restriccion("movimientos_cuenta_importe_valido", expresionSql`(${importeValido(tabla.importe)}) AND ${tabla.importe} > 0`)`), actualizamos la migración inicial `0000_inicial.sql` y agregamos el test correspondiente en `src/pruebas/base-errores-formatos.prueba.ts` (línea 256).
 
 ---
 

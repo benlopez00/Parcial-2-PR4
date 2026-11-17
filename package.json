@@ -5,12 +5,12 @@
   "type": "module",
   "packageManager": "pnpm@11.8.0",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
     "start": "next start",
     "test": "vitest run",
-    "verificar:tipos": "tsc --noEmit",
-    "db:generate": "drizzle-kit generate --name=inicial",
+    "verificar:tipos": "next typegen && tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx src/base-de-datos/semilla.ts"
   },
