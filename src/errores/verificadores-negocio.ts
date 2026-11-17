@@ -190,3 +190,21 @@ export function esBloqueoTransitorioSqlite(error: unknown): boolean {
   }
   return false;
 }
+
+// Implementa RF-C2: el documento es único por tipo, comparado sin puntos ni guiones.
+export function asegurarDocumentoClienteUnico(enUso: boolean): void {
+  if (enUso) throw new ErrorApi(409, CODIGOS_ERROR.DOCUMENTO_DUPLICADO, "El documento ya está registrado.");
+}
+
+// Implementa RF-C7: un cliente con saldo no se desactiva ni pierde la cuenta corriente.
+export function asegurarClienteSinSaldoPendiente(saldo: number): void {
+  if (saldo !== 0) {
+    throw new ErrorApi(422, CODIGOS_ERROR.SALDO_PENDIENTE, "El cliente tiene saldo pendiente.", { saldo });
+  }
+}
+
+// Implementa RF-C2: traduce la colisión del índice único ante escrituras concurrentes.
+export function traducirErrorEscrituraCliente(error: unknown): never {
+  asegurarDocumentoClienteUnico(esColisionUnica(error, "clientes.nro_doc", "clientes_documento_unico"));
+  throw error;
+}
