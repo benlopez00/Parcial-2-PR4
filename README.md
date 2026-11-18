@@ -28,7 +28,7 @@ El desarrollo se divide en **3 bloques consecutivos de 4 tickets cada uno (12 ti
 | [T06](./docs/tickets/T06-backend-cuenta-corriente-y-pagos/ticket.md) | Integrante 2 | Hito 2 | Servicios, validaciones Zod, pruebas y API REST de Cuenta Corriente y Pagos con recibo numerado en transacción. | Completado |
 | [T07](./docs/tickets/T07-frontend-clientes-cuenta-y-pagos/ticket.md) | Integrante 2 | Hito 2 | Pantallas de Clientes, Ficha, Cuenta Corriente, Saldos, modal de Pago y vista imprimible de Recibo. | Completado |
 | [T08](./docs/tickets/T08-backend-facturacion-y-anulacion/ticket.md) | Integrante 2 | Hito 3 | Servicios, validaciones Zod, pruebas y API REST de Facturación (`confirmarFactura` atómica y `anularFactura`). | Completado |
-| [T09](./docs/tickets/T09-frontend-nueva-venta/ticket.md) | Integrante 3 | Hito 3 | Pantalla de Nueva Venta (`/ventas/nueva`) operable con teclado, alta rápida de cliente en modal y las 3 formas de pago. | Pendiente |
+| [T09](./docs/tickets/T09-frontend-nueva-venta/ticket.md) | Integrante 3 | Hito 3 | Pantalla de Nueva Venta (`/ventas/nueva`) operable con teclado, alta rápida de cliente en modal y las 3 formas de pago. | Completado |
 | [T10](./docs/tickets/T10-frontend-listado-detalle-y-anulacion-facturas/ticket.md) | Integrante 3 | Hito 3 | Pantallas de Listado de Facturas (`/ventas`), Comprobante imprimible (`/ventas/[id]`) y modal de Anulación. | Pendiente |
 | [T11](./docs/tickets/T11-tablero-inicio-y-graficos/ticket.md) | Integrante 3 | Hito 4 | Servicio, API (`GET /api/tablero`) y Pantalla del Tablero de Inicio (`/`) con indicadores y gráficos Chart.js. | Pendiente |
 | [T12](./docs/tickets/T12-semilla-pruebas-y-despliegue/ticket.md) | Integrante 3 | Hito 4 | Script de datos de prueba (`semilla.ts`), pruebas integrales y despliegue en Vercel + Turso. | Pendiente |
@@ -60,6 +60,15 @@ Para resolver cada ticket se siguen **3 pasos estrictos** usando las plantillas 
 ---
 
 ## 4. Puesta en Marcha Local
+
+### Estado al terminar T09
+
+T01–T09 están implementados. `/ventas/nueva` permite buscar productos con teclado, crear un cliente sin perder el borrador y emitir con contado, tarjeta o cuenta corriente. El servidor conserva el cálculo definitivo de precios, stock y crédito. Las doce subtareas tienen [tickets propios](./docs/tickets/T09-frontend-nueva-venta/plan.md#subtickets) y [auditoría](./docs/tickets/T09-frontend-nueva-venta/informe-auditoria.md).
+
+La redirección de emisión apunta a `/ventas/[id]`, cuyo comprobante se implementa en **T10**; por ahora ese destino muestra 404 aunque la factura se haya emitido correctamente. La semilla completa sigue pendiente de T12: no asumir que las cuentas de demostración ya existen en una base nueva.
+
+En esta PC se verificó con Node 22.17.0 y las dependencias fijadas por el lockfile. El proyecto declara pnpm 11.8.0; se puede usar `corepack pnpm@11.8.0 <comando>` si el pnpm global es otra versión. La revisión T09 aprobó **229 pruebas**, tipos, build de producción y **32 comprobaciones de navegador** contra una base temporal separada.
+
 
 ### Estado al terminar T01
 

@@ -17,6 +17,7 @@ export interface PropiedadesCampoImporte {
   deshabilitado?: boolean;
   placeholder?: string;
   alPerderFoco?: () => void;
+  alCambiarValidez?: (valido: boolean) => void;
 }
 
 export function CampoImporte({
@@ -31,6 +32,7 @@ export function CampoImporte({
   deshabilitado = false,
   placeholder = "0,00",
   alPerderFoco,
+  alCambiarValidez,
 }: PropiedadesCampoImporte) {
   const [texto, setTexto] = React.useState(() => formatearImporteEditable(valorCentavos));
   const [errorFormato, setErrorFormato] = React.useState<string | undefined>(undefined);
@@ -40,13 +42,15 @@ export function CampoImporte({
     if (valorCentavos !== ultimoValorEmitido.current) {
       setTexto(formatearImporteEditable(valorCentavos));
       setErrorFormato(undefined);
+      alCambiarValidez?.(true);
       ultimoValorEmitido.current = valorCentavos;
     }
-  }, [valorCentavos]);
+  }, [valorCentavos, alCambiarValidez]);
 
   function manejarCambio(nuevoTexto: string) {
     setTexto(nuevoTexto);
     if (nuevoTexto.trim() === "") {
+      alCambiarValidez?.(true);
       setErrorFormato(undefined);
       ultimoValorEmitido.current = null;
       alCambiarCentavos(null);
@@ -55,10 +59,12 @@ export function CampoImporte({
 
     try {
       const centavos = pesosACentavos(nuevoTexto);
+      alCambiarValidez?.(true);
       setErrorFormato(undefined);
       ultimoValorEmitido.current = centavos;
       alCambiarCentavos(centavos);
     } catch {
+      alCambiarValidez?.(false);
       setErrorFormato("Ingresá un importe válido (hasta dos decimales).");
       ultimoValorEmitido.current = null;
       alCambiarCentavos(null);

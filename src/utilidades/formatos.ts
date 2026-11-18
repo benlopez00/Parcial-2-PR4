@@ -23,6 +23,11 @@ export function formatearCantidadConSigno(cantidad: number): string {
   return `${cantidad > 0 ? "+" : ""}${formatoEntero.format(cantidad)}`;
 }
 
+export function formatearNumero(cantidad: number): string {
+  if (!Number.isSafeInteger(cantidad)) throw new RangeError("La cantidad debe ser un entero seguro.");
+  return formatoEntero.format(cantidad);
+}
+
 export function formatearImporteEditable(centavos: number | null): string {
   if (centavos === null) return "";
   if (!Number.isSafeInteger(centavos)) throw new RangeError("El importe debe ser un entero seguro en centavos.");

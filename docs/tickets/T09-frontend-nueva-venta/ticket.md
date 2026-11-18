@@ -1,6 +1,6 @@
 # Ticket T09 — Frontend de Nueva Venta (`/ventas/nueva`) Operable con Teclado
 
-- **Responsable:** Integrante 3 (`rama: integrante-3`)
+- **Responsable:** Pablo (`ramaPablo`)
 - **Hito:** Hito 3 — Ventas
 - **Dependencias:** `T01` a `T08`
 
@@ -74,3 +74,8 @@ Construir la pantalla interactiva de mostrador **Nueva Venta (`/ventas/nueva`)**
 - **P2.6:** ¿Por qué el cliente no envía el precio ni el total al crear una factura?
 - **P4.1:** ¿En qué parte se ingresa el número de tarjeta de crédito?
 - **P5.4:** ¿Cómo se agrega un producto a la venta usando solo el teclado?
+
+
+## 6. Desglose de tareas
+
+Ver los doce [subtickets del plan](./plan.md#subtickets), cada uno con su archivo y criterio de aceptación.

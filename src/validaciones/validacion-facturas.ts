@@ -11,11 +11,13 @@ const paginacion = {
   pageSize: esquema.coerce.number().int().min(1).max(100).default(20),
 };
 
+export const esquemaCantidadVenta = esquema.number({ error: "Ingresá una cantidad." }).int("Ingresá unidades enteras.")
+  .positive("La cantidad debe ser mayor que cero.").max(Number.MAX_SAFE_INTEGER);
+
 // Implementa RF-V3 y Regla 3: el renglón solo dice qué producto y cuánto. El precio lo pone el servidor.
 const esquemaItemFactura = esquema.object({
   productoId: identificadorCuerpo,
-  cantidad: esquema.number({ error: "Ingresá una cantidad." }).int("Ingresá unidades enteras.")
-    .positive("La cantidad debe ser mayor que cero.").max(Number.MAX_SAFE_INTEGER),
+  cantidad: esquemaCantidadVenta,
 }).strict();
 
 // Implementa RF-V5 y Regla 9: de la tarjeta solo entran tipo, marca y últimos 4 dígitos.

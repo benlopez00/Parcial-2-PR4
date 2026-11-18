@@ -4,7 +4,7 @@ import { bd, type BaseDatos, type TransaccionBaseDatos } from "@/base-de-datos/c
 import { clientes, facturaItems, facturas, movimientosCuenta, productos, usuarios, type UsuarioAutenticado } from "@/base-de-datos/esquema";
 import {
   asegurarClienteActivo, asegurarCuentaCorrientePermitida, asegurarFacturaNoAnulada,
-  asegurarImporteFacturaDentroDeRango, asegurarLimiteCreditoNoExcedido, asegurarMontoRecibidoSuficiente,
+  asegurarLimiteCreditoNoExcedido, asegurarMontoRecibidoSuficiente,
   asegurarProductosActivosYConStock, asegurarRecursoExiste, asegurarRolAdmin, asegurarUsuarioAutenticado,
 } from "@/errores/verificadores-negocio";
 import {
@@ -16,6 +16,7 @@ import { formatearNumeroFactura, PUNTO_VENTA_ACTUAL } from "@/utilidades/formato
 import { ejecutarTransaccionEscritura } from "@/utilidades/transacciones";
 import { calcularSaldoCliente } from "./servicio-clientes";
 import { moverStock } from "./servicio-stock";
+import { calcularSubtotalVenta, sumarImportesVenta } from "./calculos-venta";
 
 export interface ItemFacturaPublico {
   productoId: number; codigo: string; descripcion: string;
@@ -182,16 +183,13 @@ export async function confirmarFactura(
     const renglones = entrada.items.map((item) => {
       const producto = porId.get(item.productoId);
       if (!producto) throw new Error("producto ausente tras la verificación");
-      const subtotal = BigInt(producto.precio) * BigInt(item.cantidad);
-      asegurarImporteFacturaDentroDeRango(subtotal);
+      const subtotal = calcularSubtotalVenta(producto.precio, item.cantidad);
       return {
         productoId: producto.id, codigo: producto.codigo, descripcion: producto.descripcion,
-        cantidad: item.cantidad, precioUnitario: producto.precio, subtotal: Number(subtotal),
+        cantidad: item.cantidad, precioUnitario: producto.precio, subtotal,
       };
     });
-    const totalGrande = renglones.reduce((acumulado, renglon) => acumulado + BigInt(renglon.subtotal), 0n);
-    asegurarImporteFacturaDentroDeRango(totalGrande);
-    const total = Number(totalGrande);
+    const total = sumarImportesVenta(renglones.map((renglon) => renglon.subtotal));
 
     // Paso 5: las reglas propias de cada forma de pago.
     let montoRecibido: number | null = null;
