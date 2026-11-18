@@ -52,7 +52,7 @@ export function BarraSuperior({ usuario, cantidadProductosBajoMinimo }: Propieda
   const etiquetaRol = usuario.rol === "admin" ? "Administrador" : "Vendedor";
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b bg-card/95 px-4 backdrop-blur-xs sm:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b bg-card/95 px-4 backdrop-blur-xs sm:px-6 print:hidden">
       <div className="flex items-center gap-3">
         <MenuMovil
           usuario={usuario}

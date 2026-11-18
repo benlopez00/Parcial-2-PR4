@@ -124,7 +124,7 @@ export function ContenidoPanelLateral({
 
 export function PanelLateral({ usuario, cantidadProductosBajoMinimo }: PropiedadesPanelLateral) {
   return (
-    <aside className="hidden w-64 shrink-0 border-r border-white/10 md:block">
+    <aside className="hidden w-64 shrink-0 border-r border-white/10 md:block print:hidden">
       <div className="sticky top-0 h-dvh">
         <ContenidoPanelLateral
           usuario={usuario}
