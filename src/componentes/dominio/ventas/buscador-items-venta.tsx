@@ -1,6 +1,6 @@
 "use client";
 
-import { useState as usarEstado } from "react";
+import { useEffect as usarEfecto, useState as usarEstado } from "react";
 import { Search as Buscar } from "lucide-react";
 import { Entrada } from "@/componentes/interfaz/entrada";
 import { Etiqueta } from "@/componentes/interfaz/etiqueta";
@@ -19,8 +19,15 @@ export function BuscadorItemsVenta({ deshabilitado, alAgregar }: PropiedadesBusc
   const [busqueda, cambiarBusqueda] = usarEstado("");
   const [abierto, cambiarAbierto] = usarEstado(false);
   const [seleccionado, cambiarSeleccionado] = usarEstado(0);
-  const { resultados, cargando, error, reintentar } = usarBusquedaVenta<ProductoPublico>("/api/productos", busqueda, abierto && !deshabilitado);
+  const { resultados, cargando, error, reintentar, pagina, hayAnterior, haySiguiente, anterior, siguiente }
+    = usarBusquedaVenta<ProductoPublico>("/api/productos", busqueda, abierto && !deshabilitado);
   const mostrar = abierto && busqueda.trim().length > 0;
+
+  usarEfecto(() => {
+    if (mostrar && !cargando && resultados[seleccionado]) {
+      document.getElementById(`opcion-producto-${resultados[seleccionado].id}`)?.scrollIntoView({ block: "nearest" });
+    }
+  }, [mostrar, cargando, resultados, seleccionado]);
 
   function agregar(producto: ProductoPublico) {
     if (alAgregar(producto, Number(cantidad))) {
@@ -82,6 +89,11 @@ export function BuscadorItemsVenta({ deshabilitado, alAgregar }: PropiedadesBusc
           </button>
         </li>)}
       </ul>
+      {!cargando && !error && (hayAnterior || haySiguiente) && <div className="mt-2 flex items-center justify-between gap-2 border-t pt-2">
+        <Boton variant="ghost" className="min-h-11" disabled={!hayAnterior} onClick={() => { cambiarSeleccionado(0); anterior(); }}>Anterior</Boton>
+        <span className="text-xs text-muted-foreground">Página {formatearNumero(pagina)}</span>
+        <Boton variant="ghost" className="min-h-11" disabled={!haySiguiente} onClick={() => { cambiarSeleccionado(0); siguiente(); }}>Siguiente</Boton>
+      </div>}
     </div>}
   </div>;
 }

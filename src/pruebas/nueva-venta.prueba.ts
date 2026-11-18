@@ -5,7 +5,10 @@ import {
 } from "@/servicios/borrador-venta";
 import type { ProductoPublico } from "@/servicios/servicio-productos";
 import type { ClientePublico } from "@/servicios/servicio-clientes";
-import { describirErrorVenta, leerRespuestaVenta } from "@/errores/errores-nueva-venta";
+import { clasificarErrorEmisionVenta, describirErrorVenta, leerRespuestaVenta } from "@/errores/errores-nueva-venta";
+import { createElement as crearElemento } from "react";
+import { renderToStaticMarkup as renderizar } from "react-dom/server";
+import { SelectorFormaPago } from "@/componentes/dominio/ventas/selector-forma-pago";
 import { calcularSubtotalVenta, sumarImportesVenta } from "@/servicios/calculos-venta";
 import { formatearNumero } from "@/utilidades/formatos";
 
@@ -117,5 +120,33 @@ describir("Comprador, pagos y contrato de emisión", () => {
   probar("los contadores usan formato argentino sin aceptar cantidades fraccionarias", () => {
     esperar(formatearNumero(1250)).toBe("1.250");
     esperar(() => formatearNumero(1.5)).toThrow();
+  });
+
+  probar("un monto inválido no recibe el total automático como sustituto", () => {
+    const html = renderizar(crearElemento(SelectorFormaPago, {
+      pago: { forma: "contado" }, cliente: null,
+      resumen: { total: 64000, montoRecibido: 64000, vuelto: 0, saldoResultante: 64000 },
+      deshabilitado: false, montoValido: false, alCambiar: () => {}, alCambiarValidezMonto: () => {},
+    }));
+    esperar(html).toMatch(/id="monto-recibido-venta"[^>]*value=""/);
+    esperar(html).not.toContain('value="640,00"');
+  });
+
+  probar.each([500, 502, 503])("HTTP %s puede llegar después de guardar: bloquea la repetición", async (estado) => {
+    const respuesta = new Response(JSON.stringify({ error: { code: "ERROR_INTERNO", message: "Falló la respuesta." } }), { status: estado });
+    const rechazo = await leerRespuestaVenta(respuesta).catch(clasificarErrorEmisionVenta);
+    esperar(rechazo).toMatchObject({ incierto: true, sesionVencida: false });
+  });
+
+  probar.each([401, 403, 409, 422])("HTTP %s es un rechazo confirmado y conserva el mensaje", async (estado) => {
+    const respuesta = new Response(JSON.stringify({ error: { code: "VALIDACION", message: "Revisá la venta." } }), { status: estado });
+    const rechazo = await leerRespuestaVenta(respuesta).catch(clasificarErrorEmisionVenta);
+    esperar(rechazo).toEqual({ incierto: false, sesionVencida: estado === 401, mensaje: "Revisá la venta." });
+  });
+
+  probar("un fallo de red o JSON ilegible también tiene resultado incierto", async () => {
+    esperar(clasificarErrorEmisionVenta(new TypeError("Fallo de red"))).toMatchObject({ incierto: true });
+    const rechazo = await leerRespuestaVenta(new Response("<html>Error</html>", { status: 502 })).catch(clasificarErrorEmisionVenta);
+    esperar(rechazo).toMatchObject({ incierto: true });
   });
 });

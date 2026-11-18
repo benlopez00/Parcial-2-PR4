@@ -16,6 +16,14 @@ export function describirRechazoVenta(error: ErrorPublico): string {
   return [error.message, ...faltantes].join(" · ");
 }
 
+export function clasificarErrorEmisionVenta(error: unknown) {
+  if (error instanceof ErrorApi && error.estadoHttp < 500) {
+    return { incierto: false, sesionVencida: error.estadoHttp === 401, mensaje: describirErrorVenta(error) };
+  }
+  return { incierto: true, sesionVencida: false,
+    mensaje: "No pudimos verificar si se emitió la factura. Consultá las facturas antes de iniciar otra venta para evitar duplicarla." };
+}
+
 export async function leerRespuestaVenta<Datos>(respuesta: Response): Promise<Datos> {
   const datos = await respuesta.json();
   if (!respuesta.ok) {

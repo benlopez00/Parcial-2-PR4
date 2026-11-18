@@ -9,8 +9,7 @@ import { ContenedorPagina } from "@/componentes/maquetacion/contenedor-pagina";
 import { EncabezadoPagina } from "@/componentes/maquetacion/encabezado-pagina";
 import { Titulo } from "@/componentes/maquetacion/titulo";
 import { DialogoConfirmacion } from "@/componentes/estados/dialogo-confirmacion";
-import { describirErrorVenta, describirRechazoVenta, leerRespuestaVenta } from "@/errores/errores-nueva-venta";
-import type { ErrorPublico } from "@/errores/manejador-errores";
+import { clasificarErrorEmisionVenta, describirErrorVenta, leerRespuestaVenta } from "@/errores/errores-nueva-venta";
 import type { ClientePublico } from "@/servicios/servicio-clientes";
 import type { ProductoPublico } from "@/servicios/servicio-productos";
 import type { FacturaPublica } from "@/servicios/servicio-facturas";
@@ -100,20 +99,15 @@ export function PanelNuevaVenta({ vendedor }: { vendedor: string }) {
       const respuesta = await fetch("/api/facturas", {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(cuerpo),
       });
-      const datos = await respuesta.json();
-      if (!respuesta.ok) {
-        cambiarSesionVencida(respuesta.status === 401);
-        cambiarError(describirRechazoVenta(datos.error as ErrorPublico));
-        bloqueo.current = false; cambiarEnviando(false);
-        return;
-      }
-      const factura = datos as FacturaPublica;
+      const factura = await leerRespuestaVenta<FacturaPublica>(respuesta);
       enrutador.push(`/ventas/${factura.id}`);
       enrutador.refresh();
-    } catch {
-      // Sin respuesta no sabemos si el servidor llegó a emitir: nunca reenviar automáticamente.
-      cambiarResultadoIncierto(true); cambiarEnviando(false);
-      cambiarError("No pudimos verificar si se emitió la factura. Consultá las facturas antes de iniciar otra venta para evitar duplicarla.");
+    } catch (fallo) {
+      const rechazo = clasificarErrorEmisionVenta(fallo);
+      // Un 5xx tampoco prueba que la transacción no se haya guardado.
+      bloqueo.current = rechazo.incierto;
+      cambiarResultadoIncierto(rechazo.incierto); cambiarEnviando(false);
+      cambiarSesionVencida(rechazo.sesionVencida); cambiarError(rechazo.mensaje);
     }
   }
 
@@ -167,7 +161,7 @@ export function PanelNuevaVenta({ vendedor }: { vendedor: string }) {
         </Tarjeta>
         <Tarjeta className="shadow-none">
           <TarjetaEncabezado className="p-4"><Titulo nivel="h2" className="text-base">Forma de pago <span className="ml-2 text-xs font-normal text-muted-foreground">F8</span></Titulo></TarjetaEncabezado>
-          <TarjetaContenido className="p-4 pt-0"><SelectorFormaPago pago={pago} cliente={cliente} resumen={resumen} deshabilitado={deshabilitado}
+          <TarjetaContenido className="p-4 pt-0"><SelectorFormaPago pago={pago} cliente={cliente} resumen={resumen} deshabilitado={deshabilitado} montoValido={montoValido}
             alCambiar={(nuevo) => { if (nuevo.forma !== pago.forma) cambiarMontoValido(true); cambiarPago(nuevo); cambiarError(null); }}
             alCambiarValidezMonto={cambiarMontoValido} /></TarjetaContenido>
         </Tarjeta>

@@ -153,7 +153,7 @@ Este archivo reúne **todas las preguntas y ejercicios de modificación en vivo*
 
 ### P4.1 — ¿En qué parte se ingresa el número de tarjeta de crédito?
 - **Ticket asociado:** `T08` y `T09`
-- **Archivo y función/línea:** [`src/componentes/dominio/ventas/selector-forma-pago.tsx`](./src/componentes/dominio/ventas/selector-forma-pago.tsx#L12) → `SelectorFormaPago` (L12); [`src/validaciones/validacion-facturas.ts`](./src/validaciones/validacion-facturas.ts#L25) → `const esquemaTarjeta` (L25). La pantalla pide tipo, marca y ultimos4; el campo conserva ceros iniciales y no existe un campo para el número completo.
+- **Archivo y función/línea:** `src/componentes/dominio/ventas/selector-forma-pago.tsx:22`. El pago mantiene el monto y los cuatro dígitos al volver a pulsar el medio activo.
 - **Respuesta para la defensa:** **En ninguna parte.** Por seguridad (Regla 9 y `RF-V5`), nunca se pide ni se guarda el número completo de la tarjeta: el formulario solo solicita `tipo` (`debito` o `credito`), `marca` y los **últimos 4 dígitos** (`ultimos4`). Además, el esquema Zod usa `.strict()` y valida `/^\d{4}$/`, rechazando con `422` cualquier intento de enviar un número completo.
 
 ### P4.2 — ¿Cómo se guardan las contraseñas?
@@ -197,7 +197,7 @@ Este archivo reúne **todas las preguntas y ejercicios de modificación en vivo*
 
 ### P5.4 — ¿Cómo se agrega un producto a la venta usando solo el teclado?
 - **Ticket asociado:** `T09`
-- **Archivo y función/línea:** [`src/componentes/dominio/ventas/panel-nueva-venta.tsx`](./src/componentes/dominio/ventas/panel-nueva-venta.tsx#L121) → `function manejarAtajo` (L121); [`src/componentes/dominio/ventas/buscador-items-venta.tsx`](./src/componentes/dominio/ventas/buscador-items-venta.tsx#L51) → `onKeyDown` (L51). Los atajos respetan diálogos y envío en curso; un ref impide doble confirmación.
+- **Archivo y función/línea:** `src/componentes/dominio/ventas/panel-nueva-venta.tsx:115`. BuscadorItemsVenta conserva el foco y desplaza la sugerencia activa; los botones de página permiten acceder a todas las coincidencias.
 - **Respuesta para la defensa:** Con `F2` se enfoca el buscador de productos, se escribe código o descripción, con las flechas `↑` y `↓` se recorre la lista de sugerencias, con `Enter` se agrega el producto al listado de renglones, con `F4` se pasa al selector de cliente, con `F8` a la forma de pago y con `F9` se confirma la factura.
 
 ### P5.5 — ¿Qué muestra un listado mientras carga, cuando está vacío o cuando falla?
@@ -226,6 +226,8 @@ Este archivo reúne **todas las preguntas y ejercicios de modificación en vivo*
 ### P6.4 — ¿Qué agente usaron y para qué partes del sistema? Muestren algo que el agente hizo mal y cómo lo corrigieron.
 - **Ticket asociado:** Todos (`T01` a `T12`)
 - **Registro de errores detectados y corregidos en auditorías:**
+  - **Revisión posterior de T09:** la suite anterior no cubría monto manual → texto inválido, pulsar el medio ya activo ni un 500 posterior a guardar. Se reprodujeron y corrigieron esos casos; también se agregó paginación de productos/clientes y desplazamiento de sugerencias con flechas. Ahora pasan 238 pruebas, 39 comprobaciones de navegador y una venta de la última unidad con dos procesos/usuarios (una factura, stock cero).
+
   - **T09 (`src/componentes/formularios/campo-importe.tsx` y `selector-forma-pago.tsx`):** `CampoImporte` notificaba `null` tanto para texto inválido como para un monto vacío. En contado, omitir el monto significa pagar el importe justo: sin distinguir esos estados, escribir un texto inválido podía habilitar una emisión automática. Se agregó un callback opcional de validez, respetando a los demás formularios, y se comprobó en navegador que `abc` bloquea la confirmación y corregir el monto la habilita. La revisión visual también detectó el total/confirmación demasiado abajo; se compactó la columna derecha sin quitar campos.
 
   - **T01 (`src/base-de-datos/esquema.ts`, línea 186):** Al definir las restricciones `CHECK` de las 9 tablas, el agente aplicó `importeValido(tabla.importe)` (que permite `>= 0`) sobre `movimientos_cuenta.importe`, mientras que en `pagos.importe` sí había exigido `> 0`. Esto permitía insertar movimientos de cuenta corriente con importe `0` en la base de datos. Durante la auditoría de T01 lo detectamos y corregimos en `src/base-de-datos/esquema.ts` (`restriccion("movimientos_cuenta_importe_valido", expresionSql`(${importeValido(tabla.importe)}) AND ${tabla.importe} > 0`)`), actualizamos la migración inicial `0000_inicial.sql` y agregamos el test correspondiente en `src/pruebas/base-errores-formatos.prueba.ts` (línea 256).

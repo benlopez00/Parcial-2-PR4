@@ -70,3 +70,61 @@ El bloqueo de doble envío opera sobre el borrador de esta pantalla; no es una c
 | ¿Cómo se evita superar stock o crédito? | Verificadores compartidos en `borrador-venta.ts` y comprobación definitiva/transaccional de T08. |
 | ¿Qué cambió al crear cliente en medio de la venta? | `ModalFormularioCliente.alCompletar` cambia solo el comprador; el estado de renglones permanece en PanelNuevaVenta. |
 | ¿Se guarda el número de tarjeta? | Solo `tipo`, `marca`, `ultimos4`; el campo es texto para conservar ceros y Zod exige cuatro dígitos. |
+
+
+## 7. Revisión posterior con Ponytail Review
+
+Qué hace este cambio: T09 permite preparar una venta, elegir comprador y medio de pago y emitirla por el servicio existente. Revisé el commit `84d2c1c`, sus consumidores, validaciones, sesión, transacciones y pruebas; reproduje cinco fallos y los corregí en `ramaPablo`.
+
+Carga asumida: un comercio minorista con varios operadores y un catálogo mayor que una página de sugerencias. Además de la revisión del código, comprobé dos procesos de la aplicación y dos usuarios vendiendo la misma última unidad sobre SQLite compartida; no es una medición de capacidad de Turso.
+
+## Debía corregirse — corregido
+
+1. **[P1] Un error 500 permitía volver a emitir una factura ya guardada** (`src/errores/errores-nueva-venta.ts:19`).
+
+   - **Qué es:** La confirmación envía la factura y decide si se puede volver a intentar.
+   - **Problema confirmado:** Simulé que el servidor guardaba la factura y luego devolvía un 500 con JSON. La factura existía, pero el botón volvía a habilitarse.
+   - **Corrección aplicada:** Reutilicé leerRespuestaVenta y clasifiqué 5xx, fallos de red y cuerpos ilegibles como resultado incierto. El borrador queda conservado y el reenvío bloqueado; un 4xx confirmado conserva su mensaje y permite corregir.
+   - **Si se dejaba:** Repetir el envío podía crear otra factura y descontar stock por segunda vez.
+
+2. **[P1] Un monto inválido reemplazaba el importe escrito por pago automático** (`src/componentes/dominio/ventas/selector-forma-pago.tsx:31`).
+
+   - **Qué es:** Contado admite el importe justo por defecto o un monto manual para calcular el vuelto.
+   - **Problema confirmado:** En una venta de $640 escribí $1.000 y después abc: el campo se reemplazaba por 640,00 y Confirmar quedaba habilitado. La prueba inicial solo cubría abc partiendo del importe automático.
+   - **Corrección aplicada:** Cuando el texto es inválido, el selector entrega null al campo, en lugar de reenviarle el total calculado. Así se conserva abc, el error y el bloqueo hasta que el usuario lo corrija.
+   - **Si se dejaba:** La factura podía confirmarse con un monto distinto del que el usuario estaba intentando cargar.
+
+3. **[P2] Volver a pulsar el medio activo borraba sus datos** (`src/componentes/dominio/ventas/selector-forma-pago.tsx:28`).
+
+   - **Qué es:** Los botones eligen Contado, Tarjeta o Cuenta corriente.
+   - **Problema confirmado:** Pulsar Contado cuando ya estaba seleccionado eliminaba el monto manual; pulsar Tarjeta vaciaba marca y últimos cuatro dígitos.
+   - **Corrección aplicada:** Solo cambio el estado si se eligió un medio diferente. Repetir el medio activo ya no modifica ningún campo.
+   - **Si se dejaba:** Se perdían datos del cobro y el vuelto podía pasar a cero al restablecer el pago automático.
+
+4. **[P2] No se podía navegar más allá de diez coincidencias** (`src/componentes/dominio/ventas/usar-busqueda-venta.ts:23`).
+
+   - **Qué es:** Productos y clientes comparten el buscador contra sus API paginadas.
+   - **Problema confirmado:** Ambos pedían diez filas e ignoraban total y page. Con once coincidencias no existía control para alcanzar la última; códigos que son prefijo de otros y descripciones iguales pueden impedir afinar la búsqueda.
+   - **Corrección aplicada:** El hook conserva una sola página de diez, usa total y expone Anterior/Siguiente a ambos selectores. Una búsqueda nueva vuelve a la página uno; siguen funcionando cancelación y debounce.
+   - **Si se dejaba:** Parte de los productos o clientes quedaba fuera de las opciones disponibles.
+
+5. **[P2] Las flechas resaltaban productos que no se veían** (`src/componentes/dominio/ventas/buscador-items-venta.tsx:28`).
+
+   - **Qué es:** El buscador deja el foco en la entrada y resalta una sugerencia con las flechas.
+   - **Problema confirmado:** Con diez filas y una lista de alto limitado, la novena opción quedaba fuera de vista: cambiaba la selección, pero scrollTop seguía en cero.
+   - **Corrección aplicada:** Desplazo la opción activa con scrollIntoView y block nearest, sin mover el foco ni añadir animaciones.
+   - **Si se dejaba:** Enter podía agregar un producto que el operador no alcanzaba a ver resaltado.
+
+## Pruebas y límites
+
+- **238 pruebas aprobadas en 12 archivos**, incluidas nueve nuevas regresiones de monto inválido y clasificación de errores de emisión. Antes de la revisión pasaban 229; esos casos de interacción no estaban cubiertos.
+- **Siete casos de navegador reproducían los fallos antes del arreglo y pasan después.** Dos pertenecen al reinicio del medio activo y dos al buscador compartido de productos/clientes.
+- **32 comprobaciones generales de navegador repetidas:** los tres pagos reales, cliente nuevo sin perder ítems, teclado, rechazo de stock/crédito, sesión, doble F9, red y adaptación a 1440/768/390/360 px. Sumadas a las siete regresiones: 39.
+- **Concurrencia entre procesos:** dos usuarios, dos procesos, misma base y última unidad; respuestas 201 y 409, una sola factura confirmada, stock final cero y total exacto de 1001 centavos.
+- **Tipos y build de producción aprobados.** Se probó el build, no solamente el servidor de desarrollo.
+- **Inspección visual:** 0 FAIL. Se conservan las tres advertencias ya justificadas por el diseño existente y el mostrador vacío; la sombra del lint solo está en el menú flotante. Se miraron las capturas de los tres tamaños, tanto pliegues como páginas.
+- Todos los datos de navegador y las emisiones de prueba usaron una base temporal en `work`, separada de la base del usuario. No se añadieron paquetes, endpoints, migraciones ni una capa de abstracción; la confirmación ahora reutiliza el lector de respuestas que ya existía.
+
+**Veredicto: T09 listo con estas correcciones.** No quedaron hallazgos abiertos de esta revisión. La pantalla del comprobante `/ventas/[id]` sigue pendiente de T10: la emisión funciona, pero ese destino aún responde 404. No se modificó ese alcance ni se publicó la aplicación.
+
+**No comprobado:** ejecución real en Turso/Vercel, carga sostenida de muchos usuarios y lector de pantalla. La prueba de dos procesos valida la concurrencia local indicada, no sustituye esas comprobaciones.

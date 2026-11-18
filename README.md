@@ -67,7 +67,7 @@ T01–T09 están implementados. `/ventas/nueva` permite buscar productos con tec
 
 La redirección de emisión apunta a `/ventas/[id]`, cuyo comprobante se implementa en **T10**; por ahora ese destino muestra 404 aunque la factura se haya emitido correctamente. La semilla completa sigue pendiente de T12: no asumir que las cuentas de demostración ya existen en una base nueva.
 
-En esta PC se verificó con Node 22.17.0 y las dependencias fijadas por el lockfile. El proyecto declara pnpm 11.8.0; se puede usar `corepack pnpm@11.8.0 <comando>` si el pnpm global es otra versión. La revisión T09 aprobó **229 pruebas**, tipos, build de producción y **32 comprobaciones de navegador** contra una base temporal separada.
+En esta PC se verificó con Node 22.17.0 y las dependencias fijadas por el lockfile. El proyecto declara pnpm 11.8.0; se puede usar `corepack pnpm@11.8.0 <comando>` si el pnpm global es otra versión. La revisión posterior de T09 aprobó **238 pruebas**, tipos, build de producción y **39 comprobaciones de navegador** contra una base temporal separada; también se verificó la venta simultánea de la última unidad desde dos procesos y dos usuarios.
 
 
 ### Estado al terminar T01

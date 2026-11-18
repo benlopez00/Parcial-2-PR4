@@ -14,20 +14,21 @@ interface PropiedadesSelectorFormaPago {
   cliente: ClientePublico | null;
   resumen: { total: number; montoRecibido: number; vuelto: number; saldoResultante: number | null };
   deshabilitado: boolean;
+  montoValido: boolean;
   alCambiar: (pago: PagoVenta) => void;
   alCambiarValidezMonto: (valido: boolean) => void;
 }
 
-export function SelectorFormaPago({ pago, cliente, resumen, deshabilitado, alCambiar, alCambiarValidezMonto }: PropiedadesSelectorFormaPago) {
+export function SelectorFormaPago({ pago, cliente, resumen, deshabilitado, montoValido, alCambiar, alCambiarValidezMonto }: PropiedadesSelectorFormaPago) {
   return <div className="space-y-3">
     <div role="group" aria-label="Forma de pago" className="grid grid-cols-3 gap-1 rounded-lg bg-secondary p-1">
       {([['contado', 'Contado'], ['tarjeta', 'Tarjeta'], ['cuenta_corriente', 'Cta. cte.']] as const).map(([forma, etiqueta]) => <Boton key={forma}
         id={`pago-venta-${forma}`} variant={pago.forma === forma ? "outline" : "ghost"} className="min-h-11 px-1 shadow-none"
         disabled={deshabilitado || (forma === "cuenta_corriente" && !cliente?.cuentaCorriente)} aria-pressed={pago.forma === forma}
-        onClick={() => alCambiar(forma === "tarjeta" ? { forma, tarjeta: { tipo: "debito", marca: "", ultimos4: "" } } : { forma })}>{etiqueta}</Boton>)}
+        onClick={() => { if (forma !== pago.forma) alCambiar(forma === "tarjeta" ? { forma, tarjeta: { tipo: "debito", marca: "", ultimos4: "" } } : { forma }); }}>{etiqueta}</Boton>)}
     </div>
     {pago.forma === "contado" && <div className="space-y-4">
-      <CampoImporte id="monto-recibido-venta" etiqueta="Monto recibido ($)" valorCentavos={resumen.montoRecibido}
+      <CampoImporte id="monto-recibido-venta" etiqueta="Monto recibido ($)" valorCentavos={montoValido ? resumen.montoRecibido : null}
         alCambiarCentavos={(monto) => alCambiar(monto === null ? { forma: "contado" } : { forma: "contado", montoRecibido: monto })}
         alCambiarValidez={alCambiarValidezMonto} deshabilitado={deshabilitado} ayuda="Si lo dejás vacío, se toma el importe justo." />
       <p className="flex justify-between gap-3 text-sm"><span className="text-muted-foreground">Vuelto</span><span className="font-medium tabular-nums">{formatearMoneda(resumen.vuelto)}</span></p>

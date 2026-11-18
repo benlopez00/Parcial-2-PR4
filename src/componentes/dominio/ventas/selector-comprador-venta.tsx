@@ -7,7 +7,7 @@ import { Etiqueta } from "@/componentes/interfaz/etiqueta";
 import { Insignia } from "@/componentes/interfaz/insignia";
 import { ModalFormularioCliente } from "@/componentes/dominio/clientes/modal-formulario-cliente";
 import type { ClientePublico } from "@/servicios/servicio-clientes";
-import { formatearMoneda } from "@/utilidades/formatos";
+import { formatearMoneda, formatearNumero } from "@/utilidades/formatos";
 import { usarBusquedaVenta } from "./usar-busqueda-venta";
 
 interface PropiedadesSelectorCompradorVenta {
@@ -21,7 +21,8 @@ interface PropiedadesSelectorCompradorVenta {
 export function SelectorCompradorVenta({ registrado, cliente, deshabilitado, alCambiarModo, alSeleccionar }: PropiedadesSelectorCompradorVenta) {
   const [busqueda, cambiarBusqueda] = usarEstado("");
   const [nuevoCliente, cambiarNuevoCliente] = usarEstado(false);
-  const { resultados, cargando, error, reintentar } = usarBusquedaVenta<ClientePublico>("/api/clientes", busqueda, registrado && !cliente && !deshabilitado);
+  const { resultados, cargando, error, reintentar, pagina, hayAnterior, haySiguiente, anterior, siguiente }
+    = usarBusquedaVenta<ClientePublico>("/api/clientes", busqueda, registrado && !cliente && !deshabilitado);
   return <div className="space-y-3">
     <div role="group" aria-label="Tipo de comprador" className="grid grid-cols-2 gap-1 rounded-lg bg-secondary p-1">
       <Boton variant={!registrado ? "outline" : "ghost"} className="h-auto min-h-11 whitespace-normal px-2 shadow-none" disabled={deshabilitado}
@@ -51,6 +52,11 @@ export function SelectorCompradorVenta({ registrado, cliente, deshabilitado, alC
           className="h-auto min-h-11 w-full justify-start whitespace-normal text-left" onClick={() => alSeleccionar(opcion)}>
           <span><span className="block">{opcion.nombre}</span><span className="text-xs text-muted-foreground">{opcion.tipoDoc} {opcion.nroDoc}</span></span>
         </Boton>)}
+        {!cargando && !error && (hayAnterior || haySiguiente) && <div className="flex items-center justify-between gap-2 border-t pt-2">
+          <Boton variant="ghost" className="min-h-11" disabled={!hayAnterior} onClick={anterior}>Anterior</Boton>
+          <span className="text-xs text-muted-foreground">Página {formatearNumero(pagina)}</span>
+          <Boton variant="ghost" className="min-h-11" disabled={!haySiguiente} onClick={siguiente}>Siguiente</Boton>
+        </div>}
       </div>
       <Boton variant="outline" className="min-h-11 w-full" disabled={deshabilitado} onClick={() => cambiarNuevoCliente(true)}>+ Nuevo cliente</Boton>
     </div>}
