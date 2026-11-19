@@ -1,6 +1,7 @@
 # Ticket T12 — Script de Datos Iniciales (`semilla.ts`), Pruebas Integrales y Despliegue (Vercel + Turso)
 
-- **Responsable:** Integrante 3 (`rama: integrante-3`)
+- **Responsable:** Pablo (`ramaPablo`)
+- **Estado:** Implementación local verificada; publicación pendiente de accesos.
 - **Hito:** Hito 4 — Cierre
 - **Dependencias:** `T01` a `T11`
 
@@ -64,3 +65,22 @@ Construir el script de datos de prueba (`src/base-de-datos/semilla.ts`) invocand
 - **P6.2:** ¿Cómo se crearon las tablas en Turso?
 - **P6.3:** ¿Cómo se comprueba que el sitio publicado usa la base de Turso y no una local?
 - **P6.4:** ¿Qué agente usaron y para qué partes del sistema? Muestren algo que el agente hizo mal y cómo lo corrigieron.
+
+
+## 6. Ejecución y estado real — 19/11/2026
+
+- [x] T12.01: diseño de carga atómica e idempotencia sin borrar datos ajenos.
+- [x] T12.02: 3 usuarios, 5 categorías, 30 productos y 10 clientes con datos ficticios.
+- [x] T12.03: 51 facturas distribuidas en 30 días y tres formas de pago; 3 anuladas.
+- [x] T12.04: fechas privadas coherentes en altas, stock, cuenta, facturas, pagos y anulaciones.
+- [x] T12.05: 6 pagos parciales; repetición conserva datos y no genera duplicados.
+- [x] T12.06: invariantes, numeración, recibos históricos y rollback integral automatizados.
+- [x] T12.07: instalación limpia, 299 pruebas, tipos, build y 35 comprobaciones de navegador; dos regresiones de T10 corregidas.
+- [ ] T12.08: migración y carga en Turso pendientes de cuenta/base y acceso. Configuración y procedimiento preparados.
+- [ ] T12.09: publicación en Vercel pendiente de cuenta/proyecto y destino de entrega.
+- [ ] T12.10: recorrido sobre URL pública HTTPS y persistencia remota pendientes del despliegue.
+- [ ] T12.11: README, auditoría y defensa actualizados; faltan URL pública/evidencia remota y legajos para cerrar la entrega.
+
+**Decisión sobre repetición:** se implementó una carga sin borrado: una demo completa existente produce una operación sin cambios; una base ajena se rechaza. No hay reinicio destructivo. La primera carga usa una transacción y los servicios existentes. La prueba de fallo a mitad de carga confirma que no quedan datos parciales.
+
+La parte local está verificada. T12 no se marca Completado porque todavía no hay un despliegue verificado en Vercel/Turso. Ver [informe](./informe-auditoria.md) y [procedimiento de publicación](../../despliegue.md).

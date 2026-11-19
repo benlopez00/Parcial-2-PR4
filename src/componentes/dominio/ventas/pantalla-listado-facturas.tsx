@@ -25,6 +25,7 @@ export function PantallaListadoFacturas({ consulta, listado, opciones }: Propied
   const parametros = usarParametrosBusqueda();
   const [pendiente, iniciarTransicion] = usarTransicion();
   function navegar(cambios: CambiosConsultaFacturas): void {
+    if (pendiente) return;
     iniciarTransicion(() => enrutador.push(construirUrlFacturas(new URLSearchParams(parametros), cambios), { scroll: false }));
   }
   return <ContenedorPagina ancho="completo">
@@ -34,7 +35,9 @@ export function PantallaListadoFacturas({ consulta, listado, opciones }: Propied
     <Tarjeta aria-busy={pendiente} className="overflow-hidden">
       <FiltrosListadoFacturas key={JSON.stringify(consulta)} consulta={consulta} opciones={opciones} pendiente={pendiente} alAplicar={navegar} />
       {pendiente && <p role="status" className="px-4 py-2 text-sm text-muted-foreground">Actualizando facturas…</p>}
-      <TablaListadoFacturas listado={listado} alCambiarPagina={(page) => navegar({ page })} />
+      <fieldset disabled={pendiente} className="min-w-0">
+        <TablaListadoFacturas listado={listado} alCambiarPagina={(page) => navegar({ page })} />
+      </fieldset>
     </Tarjeta>
   </ContenedorPagina>;
 }
