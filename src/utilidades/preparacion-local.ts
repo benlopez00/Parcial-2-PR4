@@ -1,10 +1,11 @@
 import { randomBytes as bytesAleatorios } from "node:crypto";
 import { readFile as leerArchivo, writeFile as escribirArchivo } from "node:fs/promises";
 import { parse as leerVariables } from "dotenv";
+import { obtenerConfiguracionBaseDatos } from "@/validaciones/validacion-entorno";
 
 // T12: los comandos de instalación generan una clave local una sola vez y conservan cualquier clave ya configurada.
 export async function prepararSesionLocal(rutaEntorno = ".env") {
-  if (process.env.SESSION_SECRET?.trim() || process.env.VERCEL === "1" || !(process.env.DATABASE_URL || "file:./local.db").startsWith("file:")) return;
+  if (process.env.SESSION_SECRET?.trim() || process.env.VERCEL === "1" || !obtenerConfiguracionBaseDatos().url.startsWith("file:")) return;
   let contenido = "";
   try { contenido = await leerArchivo(rutaEntorno, "utf8"); }
   catch (error) { if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error; }

@@ -36,8 +36,9 @@ describir("T12: entorno local y destino remoto", () => {
     await prepararSesionLocal(archivo);
     await esperar(leerArchivo(archivo)).rejects.toMatchObject({ code: "ENOENT" });
   });
-  probar("una base remota no genera ni persiste un secreto local", async () => {
-    vi.stubEnv("DATABASE_URL", "libsql://demo.turso.io");
+  probar.each(["DATABASE_URL", "TURSO_DATABASE_URL"])("una base remota en %s no genera ni persiste un secreto local", async (variable) => {
+    vi.stubEnv("DATABASE_URL", "");
+    vi.stubEnv(variable, "libsql://demo.turso.io");
     await prepararSesionLocal(archivo);
     esperar(process.env.SESSION_SECRET).toBe("");
     await esperar(leerArchivo(archivo)).rejects.toMatchObject({ code: "ENOENT" });
@@ -48,5 +49,11 @@ describir("T12: entorno local y destino remoto", () => {
     esperar(() => obtenerConfiguracionBaseDatos({ VERCEL: "1", DATABASE_URL: "libsql://demo.turso.io" })).toThrow("DATABASE_AUTH_TOKEN");
     esperar(() => obtenerConfiguracionBaseDatos({ VERCEL: "1", DATABASE_URL: "file:./demo.db", DATABASE_AUTH_TOKEN: "token-ficticio" })).toThrow();
     esperar(obtenerConfiguracionBaseDatos({ VERCEL: "1", DATABASE_URL: "libsql://demo.turso.io", DATABASE_AUTH_TOKEN: "token-ficticio" })).toEqual({ url: "libsql://demo.turso.io", authToken: "token-ficticio" });
+  });
+  probar("acepta las variables nativas de Marketplace y conserva la prioridad del destino local explícito", () => {
+    const remoto = { VERCEL: "1", TURSO_DATABASE_URL: "libsql://demo.turso.io", TURSO_AUTH_TOKEN: "token-ficticio" };
+    esperar(obtenerConfiguracionBaseDatos(remoto)).toEqual({ url: "libsql://demo.turso.io", authToken: "token-ficticio" });
+    esperar(() => obtenerConfiguracionBaseDatos({ ...remoto, DATABASE_URL: "file:./local.db" })).toThrow("SQLite local no está permitido");
+    esperar(obtenerConfiguracionBaseDatos({ ...remoto, VERCEL: "", DATABASE_URL: "file:./local.db" }).url).toBe("file:./local.db");
   });
 });
