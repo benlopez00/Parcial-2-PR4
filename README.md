@@ -67,6 +67,8 @@ T11 completa `/` y `GET /api/tablero`: cuatro indicadores, barras de los último
 
 La validación final aprobó **288 pruebas**, tipos, compilación de producción y **58 comprobaciones en navegador**, con ambos roles y anchos de 1440/768/390/360 px. Se verificó también un fallo real sobre una base aislada y la recuperación con Reintentar. Se agregaron las dependencias obligatorias `chart.js@4.6.1` y `react-chartjs-2@5.3.1`, sin migraciones. Ver [ticket y checklist](./docs/tickets/T11-tablero-inicio-y-graficos/ticket.md) e [informe de auditoría](./docs/tickets/T11-tablero-inicio-y-graficos/informe-auditoria.md). Semilla completa y despliegue continúan pendientes de T12.
 
+La inspección posterior de T11 corrigió un desborde móvil de códigos largos en Para reponer, conservando el texto completo. Aprobó nuevamente 288 pruebas, tipos y build, y 29 comprobaciones adicionales de navegador, incluidas cinco consultas simultáneas y recuperación ante un fallo de base. El detalle está en la sección 5 del informe de T11.
+
 ### Estado al terminar T10
 
 T01–T10 están implementados. `/ventas/nueva` permite buscar productos con teclado, crear un cliente sin perder el borrador y emitir con contado, tarjeta o cuenta corriente. El servidor conserva el cálculo definitivo de precios, stock y crédito. Las doce subtareas de T09 tienen [tickets propios](./docs/tickets/T09-frontend-nueva-venta/plan.md#subtickets) y [auditoría](./docs/tickets/T09-frontend-nueva-venta/informe-auditoria.md).

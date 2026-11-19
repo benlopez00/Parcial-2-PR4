@@ -247,6 +247,8 @@ Este archivo reúne **todas las preguntas y ejercicios de modificación en vivo*
 
 - **T11 ([`ErrorInicio`](./src/app/%28sistema%29/error.tsx)):** El agente conectó Reintentar solamente a `reset()`. Al simular una tabla de facturas no disponible en una base aislada y luego restaurarla, el error seguía en pantalla porque no se solicitaban nuevos datos del servidor. Se agregó `router.refresh()` junto a `reset()` dentro de una transición. Se repitió el recorrido completo: 58 comprobaciones de navegador aprobadas, incluida la recuperación y la integridad de claves foráneas. [Informe de T11](./docs/tickets/T11-tablero-inicio-y-graficos/informe-auditoria.md).
 
+- **Revisión de T11 ([`ListaReposicionStock`](./src/componentes/dominio/tablero/lista-reposicion-stock.tsx)):** Un código válido de 64 caracteres desbordaba la pantalla de 360 px hasta 455 px y tapaba la existencia. La primera revisión solo usaba códigos cortos. Se agregó `break-all` únicamente al texto del código y se repitió el mismo caso en navegador: el código completo se ajusta a su columna y la página conserva 360 px. Se verificó también a 390/768/1440 px.
+
 ---
 
 ## 7. Guía Rápida para los «Cambios Pequeños en Vivo» (`docs/README.md`)

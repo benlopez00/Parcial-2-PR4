@@ -54,3 +54,15 @@ La pantalla conserva el layout y la paleta del sistema: saludo, fecha, Nueva ven
 1. **¿Por qué hay treinta días aunque no existan ventas?** Abrir `calcularPeriodosTablero` y después el `map` de `ventasDiarias` en `obtenerDatosTablero`: primero se genera el calendario y luego se completa cada importe faltante con cero. El día local comienza a las 03:00 UTC.
 2. **¿Dónde se excluyen anuladas y se calcula el promedio?** Mostrar ambas consultas con `estado = emitida` y el redondeo con `BigInt` en el servicio. La interfaz recibe resultados y los formatea; no recalcula facturación ni saldos. Explicar por qué los saldos negativos de otros clientes no reducen la deuda positiva.
 3. **¿Cómo se ve el dato sin distinguir colores y cómo se recupera un fallo?** Abrir los dos componentes de gráficos: nombres accesibles, tabla diaria y leyenda con texto/importes. Mostrar `ErrorInicio`, el refresco del servidor y la corrección reproducida descrita en P6.4. `PantallaTablero` permite Actualizar sin borrar los datos visibles.
+
+## 5. Inspección posterior de T11 — 19/11/2026
+
+Se revisó el commit `2e09a30` junto con sus llamadas a clientes, productos, navegación, sesión y revalidación. Se asumió una ferretería con pocos vendedores simultáneos, consistente con la demo prevista; no una instalación con millones de comprobantes.
+
+**Error reproducido y corregido:** un código alfanumérico válido de 64 caracteres en Para reponer hacía que una pantalla de 360 px tuviera 455 px de contenido y el texto tapara la existencia. Se agregó únicamente `break-all` al código en `ListaReposicionStock`, sin recortar ni modificar el dato. La misma prueba pasó después: página de 360 px y código contenido dentro de su columna. También pasó a 390/768/1440 px. La regresión se comprobó en navegador real; no se agregó una prueba de clases CSS que solo repitiera la implementación.
+
+**Verificación de la inspección:** 288 pruebas automatizadas, tipos y nueva compilación de producción aprobados. Pasaron 29 comprobaciones adicionales de navegador: datos poblados, teclado para abrir/cerrar la tabla diaria, cuatro anchos, código largo completo, ambos roles, parámetros ajenos, salida de sesión, fallo de base sin filtrar SQL, Reintentar y claves foráneas. Veinte consultas en ráfagas de cinco devolvieron datos idénticos sin errores; en esa base local, p50 de 23 ms y p95 de 38 ms. Estas cifras describen la prueba pequeña, no un compromiso de rendimiento en producción.
+
+No se encontraron otros errores confirmados en T11. Scripts, resultados y capturas antes/después quedaron en el espacio local de trabajo, fuera de Git. Se conservó la base personal de demostración. No se probó Turso/Vercel ni carga masiva; las incidencias previas de paginación de T10 continúan fuera de esta inspección.
+
+La inspección visual repetida a cuatro anchos terminó con 0 FAIL y la misma advertencia de paleta crema, aceptada por conservar el sistema visual existente. Se verificó además la demo personal con ambos usuarios, sin crear facturas ni modificar stock/saldos.

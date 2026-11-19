@@ -89,3 +89,5 @@ Implementar el servicio `obtenerDatosTablero()`, el endpoint `GET /api/tablero` 
 - [x] Ejecutar pruebas, tipos, build y navegador; cerrar auditoría, defensa y README.
 
 **Cierre:** 288 pruebas automatizadas, verificación de tipos y compilación de producción aprobadas; 58 comprobaciones de navegador con ambos roles y anchos de 1440/768/390/360 px. Se corrigió y volvió a probar la recuperación con Reintentar. Ver [informe de auditoría](./informe-auditoria.md). No cambia el esquema de datos. Semilla y despliegue siguen en T12.
+
+**Inspección posterior (19/11/2026):** se corrigió el desborde móvil de códigos largos permitidos en Para reponer. La regresión falló antes y pasó después; 29 comprobaciones adicionales de navegador, 288 pruebas, tipos y nuevo build aprobados. Detalle en la sección 5 del informe.

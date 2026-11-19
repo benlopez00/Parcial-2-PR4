@@ -13,7 +13,7 @@ export function ListaReposicionStock({ listado }: { listado: ListadoProductos })
     </TarjetaEncabezado>
     <TarjetaContenido className="p-0">
       {listado.data.length ? <ul className="divide-y">{listado.data.map((producto) => <li key={producto.id} className="flex items-center justify-between gap-3 px-4 py-3">
-        <div className="min-w-0"><Enlace href={`/productos/${producto.id}`} className="break-words text-sm font-medium text-primary underline-offset-4 hover:underline">{producto.descripcion}</Enlace><p className="font-mono text-xs text-muted-foreground">{producto.codigo}</p></div>
+        <div className="min-w-0"><Enlace href={`/productos/${producto.id}`} className="break-words text-sm font-medium text-primary underline-offset-4 hover:underline">{producto.descripcion}</Enlace><p className="break-all font-mono text-xs text-muted-foreground">{producto.codigo}</p></div>
         <div className="shrink-0 text-right"><Insignia variant="warning" className="whitespace-nowrap">{formatearNumero(producto.existencia)} · bajo mínimo</Insignia><p className="mt-1 text-xs text-muted-foreground">Mínimo {formatearNumero(producto.stockMinimo)}</p></div>
       </li>)}</ul> : <p className="px-4 pb-4 text-sm text-muted-foreground">No hay productos activos bajo el mínimo.</p>}
       {listado.total > listado.data.length && <p className="px-4 py-3 text-xs text-muted-foreground">Mostrando {formatearNumero(listado.data.length)} de {formatearNumero(listado.total)} productos para reponer.</p>}
