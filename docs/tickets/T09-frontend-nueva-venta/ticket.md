@@ -1,6 +1,7 @@
 # Ticket T09 — Frontend de Nueva Venta (`/ventas/nueva`) Operable con Teclado
 
 - **Responsable:** Pablo (`ramaPablo`)
+- **Estado:** Completado; auditado junto con T10–T12 el 19/11/2026.
 - **Hito:** Hito 3 — Ventas
 - **Dependencias:** `T01` a `T08`
 

@@ -80,6 +80,8 @@ Se corrigieron en este cierre las dos incidencias de paginación detectadas en T
 
 Guía de código: [AGENTS.md](./AGENTS.md). Preguntas: [respuestas-defensa.md](./respuestas-defensa.md). Alcance y evidencia: [ticket de T12](./docs/tickets/T12-semilla-pruebas-y-despliegue/ticket.md), [plan](./docs/tickets/T12-semilla-pruebas-y-despliegue/plan.md) e [informe](./docs/tickets/T12-semilla-pruebas-y-despliegue/informe-auditoria.md). El checklist personal está fuera del repositorio.
 
+Auditoría conjunta del 19/11/2026: **301 pruebas, tipos, build y 68 comprobaciones de navegador aprobados**, más concurrencia con dos procesos sobre la última unidad. No se encontraron nuevos defectos funcionales. Ver [informe de T09–T12](./docs/auditoria-t09-t12.md).
+
 ## Publicación
 
 Proyecto `parcial-2-pr4` en el equipo Vercel `pablocollantedev-5008`, Node 22 y pnpm 11.8.0. Turso `parcial-2-pr4-demo`, región `iad1`, plan Starter de $0/mes al aprovisionarlo. La integración administra `TURSO_DATABASE_URL` y `TURSO_AUTH_TOKEN`; `SESSION_SECRET` es privado y diferente en producción y vista previa. No ejecutar migraciones ni semilla como parte del build o de una visita.

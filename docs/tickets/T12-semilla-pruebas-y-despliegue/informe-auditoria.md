@@ -64,3 +64,7 @@ Las bases temporales y sus credenciales, capturas, scripts de navegador y checkl
 1. **¿La semilla puede generar stock o saldo incoherente?** Abrir `cargarDatosDemostracion` y seguir las llamadas a los servicios. Mostrar el test de rollback y los cálculos independientes sobre movimientos. La semilla solo ajusta fechas después de las operaciones.
 2. **¿Qué pasa al ejecutarla dos veces?** Mostrar la guarda de base ocupada y la prueba que agrega una operación posterior. No se borran datos ni se reinician contraseñas; para otra demo inicial se elige un destino vacío.
 3. **¿Cómo saben que la publicación usa Turso?** Mostrar la configuración que rechaza SQLite en Vercel y el procedimiento de emitir en la URL HTTPS y consultar el registro desde Turso. Mostrar las facturas 52/53 y el recibo 7 del recorrido HTTPS y su consulta directa en Turso, con estado y montos coincidentes.
+
+## Auditoría conjunta T09–T12 — 19/11/2026
+
+Se revisaron nuevamente los cuatro tickets integrados. Aprobaron 301 pruebas, tipos, build y 68 comprobaciones de navegador, más una venta simultánea de la última unidad desde dos procesos. No se encontraron defectos funcionales nuevos; se corrigieron referencias documentales antiguas al 404 y a las regresiones de paginación. La compilación actual quedó disponible en `http://localhost:3000`, preservando la base personal. Evidencia, alcance y límites en el [informe conjunto](../../auditoria-t09-t12.md).

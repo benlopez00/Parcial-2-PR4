@@ -47,7 +47,7 @@ La pantalla conserva el layout y la paleta del sistema: saludo, fecha, Nueva ven
 
 **Corrección real para P6.4:** la primera versión de `ErrorInicio` ejecutaba únicamente `reset()`. Después de restaurar la base, el botón seguía mostrando el error: no pedía una nueva respuesta al servidor. Se reprodujo en navegador, se agregó `router.refresh()` junto al reinicio dentro de una transición y se repitió todo el recorrido; la recuperación pasó. La copia de los estados compartidos se dejó genérica porque el límite también puede atender rutas hijas sin límite propio.
 
-**Límites:** calendario UTC−3 fijo, igual que las consultas existentes, con comentario para migrar a zona IANA si Argentina cambia su horario. Verificado en SQLite local y Chromium; no se probó Turso/Vercel ni carga masiva. Las dos incidencias de paginación de T10 detectadas en su revisión posterior siguen fuera del alcance de T11: paginar mientras cambia un filtro y quedar en una página vacía al anular su última factura. Semilla y despliegue corresponden a T12. Bases, credenciales, scripts/capturas de comprobación y checklist personal permanecen fuera de Git.
+**Límites del cierre original:** calendario UTC−3 fijo, igual que las consultas existentes, con comentario para migrar a zona IANA si Argentina cambia su horario. Verificado en SQLite local y Chromium; no se probó Turso/Vercel ni carga masiva. Las dos incidencias de paginación de T10 detectadas en su revisión posterior se dejaron para T12: paginar mientras cambia un filtro y quedar en una página vacía al anular su última factura. T12 corrigió ambas y completó semilla y despliegue; el cierre conjunto volvió a comprobarlo. Bases, credenciales, scripts/capturas de comprobación y checklist personal permanecen fuera de Git.
 
 ## 4. Guía Rápida para Defender este Ticket en el Examen
 
@@ -63,6 +63,10 @@ Se revisó el commit `2e09a30` junto con sus llamadas a clientes, productos, nav
 
 **Verificación de la inspección:** 288 pruebas automatizadas, tipos y nueva compilación de producción aprobados. Pasaron 29 comprobaciones adicionales de navegador: datos poblados, teclado para abrir/cerrar la tabla diaria, cuatro anchos, código largo completo, ambos roles, parámetros ajenos, salida de sesión, fallo de base sin filtrar SQL, Reintentar y claves foráneas. Veinte consultas en ráfagas de cinco devolvieron datos idénticos sin errores; en esa base local, p50 de 23 ms y p95 de 38 ms. Estas cifras describen la prueba pequeña, no un compromiso de rendimiento en producción.
 
-No se encontraron otros errores confirmados en T11. Scripts, resultados y capturas antes/después quedaron en el espacio local de trabajo, fuera de Git. Se conservó la base personal de demostración. No se probó Turso/Vercel ni carga masiva; las incidencias previas de paginación de T10 continúan fuera de esta inspección.
+No se encontraron otros errores confirmados en T11. Scripts, resultados y capturas antes/después quedaron en el espacio local de trabajo, fuera de Git. Se conservó la base personal de demostración. Esa inspección se realizó en SQLite, sin carga masiva. Turso/Vercel y las incidencias de paginación de T10 se verificaron posteriormente al cerrar T12 y en la auditoría conjunta.
 
 La inspección visual repetida a cuatro anchos terminó con 0 FAIL y la misma advertencia de paleta crema, aceptada por conservar el sistema visual existente. Se verificó además la demo personal con ambos usuarios, sin crear facturas ni modificar stock/saldos.
+
+## Auditoría conjunta T09–T12 — 19/11/2026
+
+Se revisaron nuevamente los cuatro tickets integrados. Aprobaron 301 pruebas, tipos, build y 68 comprobaciones de navegador, más una venta simultánea de la última unidad desde dos procesos. No se encontraron defectos funcionales nuevos; se corrigieron referencias documentales antiguas al 404 y a las regresiones de paginación. La compilación actual quedó disponible en `http://localhost:3000`, preservando la base personal. Evidencia, alcance y límites en el [informe conjunto](../../auditoria-t09-t12.md).

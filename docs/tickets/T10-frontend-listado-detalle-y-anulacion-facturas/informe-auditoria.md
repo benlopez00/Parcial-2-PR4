@@ -45,3 +45,7 @@ El administrador puede anular una emitida con motivo obligatorio. El modal usa e
 1. **¿Qué se revierte al anular?** Abrir `ModalAnularFactura` → `accionAnularFactura` → `anularFactura`. El componente explica la consecuencia; el servicio revierte stock y cuenta atómicamente. Después `VistaComprobanteFactura` muestra quién, cuándo y por qué.
 2. **¿Ocultar Anular alcanza?** No. Mostrar la condición visual y después `envoltorioAccion`/`obtenerUsuarioActual` y `asegurarRolAdmin` en el servicio. Las pruebas cambian el rol o desactivan al usuario conservando su cookie; el permiso se pierde inmediatamente.
 3. **¿Dónde agregar una columna?** En `TablaListadoFacturas`. Si el dato no está, ampliar `ResumenFactura` y la proyección de `listarFacturas`. Los filtros y `totalEmitido` continúan resueltos por el servicio; no duplicar esas reglas en la tabla.
+
+## Auditoría conjunta T09–T12 — 19/11/2026
+
+Se revisaron nuevamente los cuatro tickets integrados. Aprobaron 301 pruebas, tipos, build y 68 comprobaciones de navegador, más una venta simultánea de la última unidad desde dos procesos. No se encontraron defectos funcionales nuevos; se corrigieron referencias documentales antiguas al 404 y a las regresiones de paginación. La compilación actual quedó disponible en `http://localhost:3000`, preservando la base personal. Evidencia, alcance y límites en el [informe conjunto](../../auditoria-t09-t12.md).

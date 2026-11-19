@@ -43,9 +43,9 @@ Se muestran VALIDACION, STOCK_INSUFICIENTE con todos sus códigos/disponibles, P
 
 F2 enfoca productos; F4 selecciona el modo registrado y enfoca clientes; F8 enfoca pago; F9 confirma. Los atajos respetan eventos consumidos, modificadores, diálogos, repetición y envío en curso.
 
-### Límite de alcance
+### Alcance original y cierre posterior
 
-La emisión redirige a `/ventas/[id]`, destino especificado por T09. La vista completa de ese comprobante pertenece a T10 y todavía no existe. No se agrega un comprobante provisional ni se marca T10 como implementado; se verifica la emisión por respuesta y BD.
+La emisión redirige a `/ventas/[id]`, destino especificado por T09. Durante el desarrollo inicial de T09 esa vista estaba pendiente de T10; no se agregó un comprobante provisional. T10 implementó el comprobante, listado y anulación. El recorrido actual llega a la factura sin 404 y fue verificado nuevamente en la auditoría conjunta de T09–T12.
 
 ## 5. Preguntas de defensa cubiertas
 

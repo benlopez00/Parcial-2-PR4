@@ -1,6 +1,6 @@
 # Informe de auditoría y guía de defensa — T09
 
-Responsable: Pablo. Rama: `ramaPablo`. Estado: **Completado**, con el comprobante final expresamente pendiente de T10.
+Responsable: Pablo. Rama: `ramaPablo`. Estado: **Completado**. El comprobante quedó integrado en T10 y el despliegue se verificó en T12; ver la auditoría conjunta al final de este informe.
 
 ## 1. Qué se construyó
 
@@ -57,7 +57,7 @@ Revisión de la última ronda: total y confirmación tienen jerarquía propia; l
 
 ## 5. Límites y qué sigue
 
-`/ventas/[id]` todavía no tiene pantalla: es T10. Se verificó que la factura se emite y persiste, y que la navegación llega al id correcto; ese destino hoy muestra 404. No se entregó un comprobante provisional ni se avanzaron listado, anulación, tablero, semilla o despliegue.
+En el cierre original de T09, `/ventas/[id]` aún no tenía pantalla y respondía 404. T10 implementó ese destino y T11/T12 completaron tablero, semilla y publicación. El recorrido actual T09 → T10 funciona y está cubierto por la auditoría conjunta del 19/11/2026.
 
 El bloqueo de doble envío opera sobre el borrador de esta pantalla; no es una clave de idempotencia del servidor para múltiples pestañas. Ante incertidumbre de red no se debe repetir la venta sin verificar su existencia. El stock/precio/saldo mostrado es una foto conocida; los definitivos siempre se validan al emitir.
 
@@ -125,6 +125,10 @@ Carga asumida: un comercio minorista con varios operadores y un catálogo mayor 
 - **Inspección visual:** 0 FAIL. Se conservan las tres advertencias ya justificadas por el diseño existente y el mostrador vacío; la sombra del lint solo está en el menú flotante. Se miraron las capturas de los tres tamaños, tanto pliegues como páginas.
 - Todos los datos de navegador y las emisiones de prueba usaron una base temporal en `work`, separada de la base del usuario. No se añadieron paquetes, endpoints, migraciones ni una capa de abstracción; la confirmación ahora reutiliza el lector de respuestas que ya existía.
 
-**Veredicto: T09 listo con estas correcciones.** No quedaron hallazgos abiertos de esta revisión. La pantalla del comprobante `/ventas/[id]` sigue pendiente de T10: la emisión funciona, pero ese destino aún responde 404. No se modificó ese alcance ni se publicó la aplicación.
+**Veredicto de aquella revisión: T09 listo con estas correcciones.** No quedaron hallazgos abiertos. El 404 y la publicación se resolvieron posteriormente en T10 y T12, respectivamente. Ver la auditoría conjunta para el estado actual.
 
 **No comprobado:** ejecución real en Turso/Vercel, carga sostenida de muchos usuarios y lector de pantalla. La prueba de dos procesos valida la concurrencia local indicada, no sustituye esas comprobaciones.
+
+## Auditoría conjunta T09–T12 — 19/11/2026
+
+Se revisaron nuevamente los cuatro tickets integrados. Aprobaron 301 pruebas, tipos, build y 68 comprobaciones de navegador, más una venta simultánea de la última unidad desde dos procesos. No se encontraron defectos funcionales nuevos; se corrigieron referencias documentales antiguas al 404 y a las regresiones de paginación. La compilación actual quedó disponible en `http://localhost:3000`, preservando la base personal. Evidencia, alcance y límites en el [informe conjunto](../../auditoria-t09-t12.md).
