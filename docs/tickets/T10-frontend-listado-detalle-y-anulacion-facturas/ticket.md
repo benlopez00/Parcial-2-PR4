@@ -1,6 +1,7 @@
 # Ticket T10 — Frontend de Listado de Facturas (`/ventas`), Comprobante Imprimible y Anulación
 
-- **Responsable:** Integrante 3 (`rama: integrante-3`)
+- **Responsable:** Pablo (`ramaPablo`)
+- **Estado:** Completado y verificado el 18/11/2026
 - **Hito:** Hito 3 — Ventas
 - **Dependencias:** `T01` a `T09`
 
@@ -70,6 +71,17 @@ Construir la pantalla de **Listado de Facturas (`/ventas`)** con todos sus filtr
 2. Las facturas anuladas muestran el importe tachado en el listado y no suman en `totalEmitido`.
 3. Un usuario con rol `vendedor` no ve el botón `Anular` en `/ventas/[id]` (y si llama a la API recibe `403`).
 4. Al imprimir `/ventas/[id]`, se oculta la navegación del sistema y solo se imprime el comprobante.
+
+### Checklist de ejecución
+
+- [x] Leer T08/T09, referencias y contratos; completar `plan.md`.
+- [x] Implementar listado, filtros URL, sumatoria y paginación.
+- [x] Implementar comprobante histórico para tres formas de pago e impresión.
+- [x] Implementar modal y Server Action de anulación con permiso de administrador.
+- [x] Probar permisos, validación, stock, cuenta y flujo T09 → T10.
+- [x] Verificar móvil, impresión, tipos y build; completar auditoría y defensa.
+
+Validación: **266 pruebas Vitest**, tipos y build aprobados; **49 comprobaciones de navegador** en SQLite aislado. Se corrigió la impresión del modal abierto. Detalle en [`informe-auditoria.md`](./informe-auditoria.md).
 
 ---
 

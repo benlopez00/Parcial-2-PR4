@@ -46,6 +46,26 @@ export interface ListadoFacturas {
 
 const anulador = aliasDe(usuarios, "anulador");
 
+export interface OpcionesListadoFacturas {
+  clientes: { id: number; nombre: string }[];
+  vendedores: { id: number; nombre: string }[];
+}
+
+// Implementa RF-V8: ambos roles filtran por personas con facturas, incluso desactivadas, sin exponer datos privados de usuarios.
+export async function obtenerOpcionesListadoFacturas(
+  usuarioActual: UsuarioAutenticado, datosSinValidar: unknown, baseDatos: BaseDatos = bd,
+): Promise<OpcionesListadoFacturas> {
+  esquemaSinDatos.parse(datosSinValidar);
+  asegurarUsuarioAutenticado(usuarioActual);
+  const [opcionesClientes, opcionesVendedores] = await Promise.all([
+    baseDatos.selectDistinct({ id: clientes.id, nombre: clientes.nombre }).from(clientes)
+      .innerJoin(facturas, igual(facturas.clienteId, clientes.id)).orderBy(clientes.nombre, clientes.id),
+    baseDatos.selectDistinct({ id: usuarios.id, nombre: usuarios.nombre }).from(usuarios)
+      .innerJoin(facturas, igual(facturas.usuarioId, usuarios.id)).orderBy(usuarios.nombre, usuarios.id),
+  ]);
+  return { clientes: opcionesClientes, vendedores: opcionesVendedores };
+}
+
 // Implementa RF-V8: interpreta lo que el usuario escribió como número de comprobante.
 // Acepta "123", "00000123" y "0001-00000123" (se queda con lo que va después del guion) y
 // compara por igualdad, no por subcadena: buscar "1" tiene que traer la factura 1 y no

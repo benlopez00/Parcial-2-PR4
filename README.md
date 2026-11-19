@@ -29,7 +29,7 @@ El desarrollo se divide en **3 bloques consecutivos de 4 tickets cada uno (12 ti
 | [T07](./docs/tickets/T07-frontend-clientes-cuenta-y-pagos/ticket.md) | Integrante 2 | Hito 2 | Pantallas de Clientes, Ficha, Cuenta Corriente, Saldos, modal de Pago y vista imprimible de Recibo. | Completado |
 | [T08](./docs/tickets/T08-backend-facturacion-y-anulacion/ticket.md) | Integrante 2 | Hito 3 | Servicios, validaciones Zod, pruebas y API REST de Facturación (`confirmarFactura` atómica y `anularFactura`). | Completado |
 | [T09](./docs/tickets/T09-frontend-nueva-venta/ticket.md) | Integrante 3 | Hito 3 | Pantalla de Nueva Venta (`/ventas/nueva`) operable con teclado, alta rápida de cliente en modal y las 3 formas de pago. | Completado |
-| [T10](./docs/tickets/T10-frontend-listado-detalle-y-anulacion-facturas/ticket.md) | Integrante 3 | Hito 3 | Pantallas de Listado de Facturas (`/ventas`), Comprobante imprimible (`/ventas/[id]`) y modal de Anulación. | Pendiente |
+| [T10](./docs/tickets/T10-frontend-listado-detalle-y-anulacion-facturas/ticket.md) | Pablo | Hito 3 | Pantallas de Listado de Facturas (`/ventas`), Comprobante imprimible (`/ventas/[id]`) y modal de Anulación. | Completado |
 | [T11](./docs/tickets/T11-tablero-inicio-y-graficos/ticket.md) | Integrante 3 | Hito 4 | Servicio, API (`GET /api/tablero`) y Pantalla del Tablero de Inicio (`/`) con indicadores y gráficos Chart.js. | Pendiente |
 | [T12](./docs/tickets/T12-semilla-pruebas-y-despliegue/ticket.md) | Integrante 3 | Hito 4 | Script de datos de prueba (`semilla.ts`), pruebas integrales y despliegue en Vercel + Turso. | Pendiente |
 
@@ -61,11 +61,13 @@ Para resolver cada ticket se siguen **3 pasos estrictos** usando las plantillas 
 
 ## 4. Puesta en Marcha Local
 
-### Estado al terminar T09
+### Estado al terminar T10
 
-T01–T09 están implementados. `/ventas/nueva` permite buscar productos con teclado, crear un cliente sin perder el borrador y emitir con contado, tarjeta o cuenta corriente. El servidor conserva el cálculo definitivo de precios, stock y crédito. Las doce subtareas tienen [tickets propios](./docs/tickets/T09-frontend-nueva-venta/plan.md#subtickets) y [auditoría](./docs/tickets/T09-frontend-nueva-venta/informe-auditoria.md).
+T01–T10 están implementados. `/ventas/nueva` permite buscar productos con teclado, crear un cliente sin perder el borrador y emitir con contado, tarjeta o cuenta corriente. El servidor conserva el cálculo definitivo de precios, stock y crédito. Las doce subtareas de T09 tienen [tickets propios](./docs/tickets/T09-frontend-nueva-venta/plan.md#subtickets) y [auditoría](./docs/tickets/T09-frontend-nueva-venta/informe-auditoria.md).
 
-La redirección de emisión apunta a `/ventas/[id]`, cuyo comprobante se implementa en **T10**; por ahora ese destino muestra 404 aunque la factura se haya emitido correctamente. La semilla completa sigue pendiente de T12: no asumir que las cuentas de demostración ya existen en una base nueva.
+T10 completa `/ventas` con siete filtros en URL, paginación y sumatoria de emitidas. La emisión de T09 ahora llega al comprobante `/ventas/[id]`, con los datos históricos y las tres formas de pago. Se puede imprimir y, como administrador, anular con motivo obligatorio; la anulación conserva su información también al imprimir. Ver [ticket y checklist de T10](./docs/tickets/T10-frontend-listado-detalle-y-anulacion-facturas/ticket.md) y [auditoría](./docs/tickets/T10-frontend-listado-detalle-y-anulacion-facturas/informe-auditoria.md).
+
+La validación de T10 aprobó **266 pruebas**, tipos, compilación de producción y **49 comprobaciones en navegador**, incluyendo impresión de 35 renglones en varias páginas. No agregó dependencias ni migraciones. La semilla completa sigue pendiente de T12: no asumir que las cuentas de demostración ya existen en una base nueva.
 
 En esta PC se verificó con Node 22.17.0 y las dependencias fijadas por el lockfile. El proyecto declara pnpm 11.8.0; se puede usar `corepack pnpm@11.8.0 <comando>` si el pnpm global es otra versión. La revisión posterior de T09 aprobó **238 pruebas**, tipos, build de producción y **39 comprobaciones de navegador** contra una base temporal separada; también se verificó la venta simultánea de la última unidad desde dos procesos y dos usuarios.
 

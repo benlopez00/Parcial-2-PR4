@@ -79,3 +79,33 @@
     @apply bg-background text-foreground font-sans antialiased;
   }
 }
+
+@media print {
+  /* Los portales de los diálogos quedan fuera del contenedor del comprobante. */
+  body:has(.comprobante-factura) > [data-state] {
+    display: none;
+  }
+  .comprobante-factura {
+    color: #111;
+    background: #fff;
+  }
+  .comprobante-factura .overflow-x-auto {
+    overflow: visible;
+  }
+  .tabla-comprobante {
+    table-layout: fixed;
+  }
+  .tabla-comprobante th:nth-child(2) {
+    width: 40%;
+  }
+  .tabla-comprobante th,
+  .tabla-comprobante td {
+    min-width: 0;
+    padding: 8px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .tabla-comprobante tr {
+    break-inside: avoid;
+  }
+}
