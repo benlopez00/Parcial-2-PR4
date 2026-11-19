@@ -30,7 +30,7 @@ El desarrollo se divide en **3 bloques consecutivos de 4 tickets cada uno (12 ti
 | [T08](./docs/tickets/T08-backend-facturacion-y-anulacion/ticket.md) | Integrante 2 | Hito 3 | Servicios, validaciones Zod, pruebas y API REST de Facturación (`confirmarFactura` atómica y `anularFactura`). | Completado |
 | [T09](./docs/tickets/T09-frontend-nueva-venta/ticket.md) | Integrante 3 | Hito 3 | Pantalla de Nueva Venta (`/ventas/nueva`) operable con teclado, alta rápida de cliente en modal y las 3 formas de pago. | Completado |
 | [T10](./docs/tickets/T10-frontend-listado-detalle-y-anulacion-facturas/ticket.md) | Pablo | Hito 3 | Pantallas de Listado de Facturas (`/ventas`), Comprobante imprimible (`/ventas/[id]`) y modal de Anulación. | Completado |
-| [T11](./docs/tickets/T11-tablero-inicio-y-graficos/ticket.md) | Integrante 3 | Hito 4 | Servicio, API (`GET /api/tablero`) y Pantalla del Tablero de Inicio (`/`) con indicadores y gráficos Chart.js. | Pendiente |
+| [T11](./docs/tickets/T11-tablero-inicio-y-graficos/ticket.md) | Pablo | Hito 4 | Servicio, API (`GET /api/tablero`) y Pantalla del Tablero de Inicio (`/`) con indicadores y gráficos Chart.js. | Completado |
 | [T12](./docs/tickets/T12-semilla-pruebas-y-despliegue/ticket.md) | Integrante 3 | Hito 4 | Script de datos de prueba (`semilla.ts`), pruebas integrales y despliegue en Vercel + Turso. | Pendiente |
 
 ---
@@ -60,6 +60,12 @@ Para resolver cada ticket se siguen **3 pasos estrictos** usando las plantillas 
 ---
 
 ## 4. Puesta en Marcha Local
+
+### Estado al terminar T11
+
+T11 completa `/` y `GET /api/tablero`: cuatro indicadores, barras de los últimos 30 días, dona por forma de pago, cinco productos más vendidos y productos para reponer. Los cálculos se realizan en el servicio, con días argentinos, importes enteros y exclusión de facturas anuladas. La deuda suma solo saldos positivos. Los gráficos tienen alternativas de texto y el inicio refleja ventas, pagos, anulaciones y stock al regresar.
+
+La validación final aprobó **288 pruebas**, tipos, compilación de producción y **58 comprobaciones en navegador**, con ambos roles y anchos de 1440/768/390/360 px. Se verificó también un fallo real sobre una base aislada y la recuperación con Reintentar. Se agregaron las dependencias obligatorias `chart.js@4.6.1` y `react-chartjs-2@5.3.1`, sin migraciones. Ver [ticket y checklist](./docs/tickets/T11-tablero-inicio-y-graficos/ticket.md) e [informe de auditoría](./docs/tickets/T11-tablero-inicio-y-graficos/informe-auditoria.md). Semilla completa y despliegue continúan pendientes de T12.
 
 ### Estado al terminar T10
 

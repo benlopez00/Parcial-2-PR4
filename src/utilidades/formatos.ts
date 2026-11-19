@@ -89,6 +89,30 @@ export function formatearFechaHora(fechaIso: string | Date): string {
   return `${formatearFecha(fechaIso)} ${formatearHora(fechaIso)}`;
 }
 
+export function formatearFechaLarga(fechaIso: string | Date): string {
+  return new Intl.DateTimeFormat("es-AR", { timeZone: zonaHoraria, weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(obtenerFecha(fechaIso));
+}
+
+export function formatearMesAnio(fechaIso: string | Date): string {
+  return new Intl.DateTimeFormat("es-AR", { timeZone: zonaHoraria, month: "long", year: "numeric" }).format(obtenerFecha(fechaIso));
+}
+
+export function formatearDiaMes(fechaIso: string | Date): string {
+  return formatearFecha(fechaIso).slice(0, 5);
+}
+
+const formatoEjeVentas = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", notation: "compact", maximumFractionDigits: 2 });
+const formatoPorcentaje = new Intl.NumberFormat("es-AR", { style: "percent", maximumFractionDigits: 1 });
+
+// El eje se abrevia para leerlo; tablas y tooltips conservan los centavos exactos.
+export function formatearEjeVentas(centavos: number): string {
+  return formatoEjeVentas.format(centavos / 100);
+}
+
+export function formatearPorcentaje(importe: number, total: number): string {
+  return formatoPorcentaje.format(total === 0 ? 0 : importe / total);
+}
+
 export function formatearNumeroComprobante(puntoVenta: number, numero: number): string {
   if (!Number.isInteger(puntoVenta) || puntoVenta < 1 || puntoVenta > 9999 ||
       !Number.isInteger(numero) || numero < 1 || numero > 99999999) {

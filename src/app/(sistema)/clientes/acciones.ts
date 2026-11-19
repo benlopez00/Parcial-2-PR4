@@ -26,5 +26,6 @@ export const registrarPagoAccion = envoltorioAccion(async (datosSinValidar: unkn
   revalidarRuta("/clientes");
   revalidarRuta(`/clientes/${recibo.cliente.id}`);
   revalidarRuta("/clientes/saldos");
+  revalidarRuta("/");
   return recibo;
 });

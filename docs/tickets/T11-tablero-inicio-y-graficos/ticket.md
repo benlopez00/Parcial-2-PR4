@@ -1,6 +1,7 @@
 # Ticket T11 — Tablero de Inicio (`/`), Servicio, API REST y Gráficos con Chart.js
 
-- **Responsable:** Integrante 3 (`rama: integrante-3`)
+- **Responsable:** Pablo (`ramaPablo`)
+- **Estado:** Completado (19/11/2026)
 - **Hito:** Hito 4 — Cierre
 - **Dependencias:** `T01` a `T10`
 
@@ -76,3 +77,15 @@ Implementar el servicio `obtenerDatosTablero()`, el endpoint `GET /api/tablero` 
 2. Una factura anulada no suma ni en `hoy`, ni en `mes`, ni en `ventasDiarias`, ni en `porFormaDePago`, ni en `masVendidos`.
 3. `ventasDiarias` tiene siempre longitud `30`.
 4. El tablero se adapta correctamente a `390 px` de ancho (`Telefono/movil-inicio.jpg`).
+
+## 6. Checklist de ejecución
+
+- [x] Revisar contrato 11.7, referencias, servicios y componentes existentes; completar plan.
+- [x] Implementar períodos argentinos, indicadores, serie de 30 días y ranking estable.
+- [x] Exponer `GET /api/tablero` con sesión y contrato exacto.
+- [x] Incorporar las dos dependencias obligatorias y los gráficos accesibles.
+- [x] Completar inicio, ranking, reposición y estados de carga/vacío/error.
+- [x] Verificar actualización tras ventas, anulación, pagos y stock.
+- [x] Ejecutar pruebas, tipos, build y navegador; cerrar auditoría, defensa y README.
+
+**Cierre:** 288 pruebas automatizadas, verificación de tipos y compilación de producción aprobadas; 58 comprobaciones de navegador con ambos roles y anchos de 1440/768/390/360 px. Se corrigió y volvió a probar la recuperación con Reintentar. Ver [informe de auditoría](./informe-auditoria.md). No cambia el esquema de datos. Semilla y despliegue siguen en T12.
