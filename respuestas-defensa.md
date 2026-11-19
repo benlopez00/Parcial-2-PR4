@@ -1,6 +1,6 @@
-# Guía de Respuestas para la Defensa Oral (`docs/README.md`)
+# Guía de Respuestas para la Defensa Oral
 
-Este archivo reúne **todas las preguntas y ejercicios de modificación en vivo** de [`docs/README.md`](./docs/README.md).
+Este archivo reúne las respuestas y ejercicios de modificación en vivo para la defensa del proyecto, según sus [requerimientos](./docs/requerimientos.md).
 - Al cerrar cada ticket con el **Prompt 3 (`docs/prompts/03-auditoria-y-defensa.md`)**, se completan aquí las rutas exactas de archivos, nombres de funciones y líneas del código implementado.
 
 ---
@@ -15,7 +15,7 @@ Este archivo reúne **todas las preguntas y ejercicios de modificación en vivo*
 ### P1.2 — ¿Dónde se conecta la aplicación con la base de datos? ¿Cómo sabe si usar la base local o la de Turso?
 - **Ticket asociado:** `T01`
 - **Archivo y función/línea:** [`src/base-de-datos/conexion.ts`](./src/base-de-datos/conexion.ts) → función `crearConexionBaseDatos()` (L6) e instancia exportada `bd` (L19).
-- **Respuesta para la defensa:** La conexión se crea en `src/base-de-datos/conexion.ts` mediante `@libsql/client` y `drizzle()`. En las líneas 14–17 evalúa `process.env.DATABASE_URL`: si no está definida o apunta a `file:./local.db`, abre el archivo SQLite local para desarrollo; en producción (Vercel) recibe la URL `libsql://...` de Turso junto con `process.env.DATABASE_AUTH_TOKEN`, sin cambiar una sola línea de código en los servicios.
+- **Respuesta para la defensa:** La conexión se crea en `src/base-de-datos/conexion.ts` mediante `@libsql/client` y `drizzle()`. Usa `obtenerConfiguracionBaseDatos`: `DATABASE_URL`/`DATABASE_AUTH_TOKEN` tienen prioridad; como alternativa lee `TURSO_DATABASE_URL`/`TURSO_AUTH_TOKEN`, provistas por Marketplace. En desarrollo permite `file:./local.db`; en Vercel exige una URL remota y token, sin cambiar los servicios.
 
 ### P1.3 — ¿Cómo se crea una tabla nueva o se agrega un campo? ¿Qué es una migración y dónde están?
 - **Ticket asociado:** `T01`
@@ -218,17 +218,17 @@ Este archivo reúne **todas las preguntas y ejercicios de modificación en vivo*
 ### P6.1 — ¿Qué variables de entorno necesita el sistema en producción y dónde se cargan?
 - **Ticket asociado:** `T12`
 - **Archivo y función:** [`.env.example`](./.env.example), [`obtenerConfiguracionBaseDatos`](./src/validaciones/validacion-entorno.ts), [`conexion.ts`](./src/base-de-datos/conexion.ts) y [`sesion.ts`](./src/utilidades/sesion.ts).
-- **Respuesta para la defensa:** `DATABASE_URL` y `DATABASE_AUTH_TOKEN` para Turso, más `SESSION_SECRET` para firmar sesiones. Se configuran del lado servidor en el proyecto de Vercel, sin prefijos públicos. `SEMILLA_PASSWORD` sirve solo durante la primera carga de la demo. En SQLite local, [`prepararSesionLocal`](./src/utilidades/preparacion-local.ts) genera la clave si falta y conserva cualquier clave existente. Los valores privados y la configuración local de Vercel no se suben a Git.
+- **Respuesta para la defensa:** `TURSO_DATABASE_URL` y `TURSO_AUTH_TOKEN`, provistas por Marketplace en este despliegue, más `SESSION_SECRET` para firmar sesiones. También se admiten `DATABASE_URL`/`DATABASE_AUTH_TOKEN` para configuración manual, con prioridad. Se configuran del lado servidor en el proyecto de Vercel, sin prefijos públicos. `SEMILLA_PASSWORD` sirve solo durante la primera carga de la demo. En SQLite local, [`prepararSesionLocal`](./src/utilidades/preparacion-local.ts) genera la clave si falta y conserva cualquier clave existente. Los valores privados y la configuración local de Vercel no se suben a Git.
 
 ### P6.2 — ¿Cómo se crean las tablas en Turso?
 - **Ticket asociado:** `T12`
 - **Archivo y función:** [`drizzle.config.ts`](./drizzle.config.ts), [migración inicial](./src/base-de-datos/migraciones/0000_inicial.sql) y [procedimiento de publicación](./docs/despliegue.md).
-- **Respuesta para la defensa:** Apuntando las variables del operador a la base Turso de demostración, ejecutar `pnpm run db:migrate` con las migraciones versionadas y luego `pnpm run db:seed`. No se ejecutan al compilar ni durante visitas. **Estado real:** ambos comandos están comprobados sobre SQLite local limpio; todavía no se ejecutaron contra Turso porque faltan cuenta/base y acceso.
+- **Respuesta para la defensa:** Apuntando las variables del operador a la base Turso de demostración, ejecutar `pnpm run db:migrate` con las migraciones versionadas y luego `pnpm run db:seed`. No se ejecutan al compilar ni durante visitas. **Estado real:** ambos comandos se ejecutaron sobre SQLite local limpio y sobre Turso `parcial-2-pr4-demo` en `iad1`. Repetir la semilla remota conservó los datos, sin duplicados.
 
 ### P6.3 — ¿Cómo se comprueba que el sitio publicado usa la base de Turso y no una local?
 - **Ticket asociado:** `T12`
 - **Archivo y función:** [`obtenerConfiguracionBaseDatos`](./src/validaciones/validacion-entorno.ts) rechaza SQLite en Vercel; [comprobaciones remotas](./docs/despliegue.md) y [pruebas de configuración](./src/pruebas/entorno-y-preparacion.prueba.ts).
-- **Respuesta para la defensa:** Emitir desde la URL HTTPS, comprobar el registro recién creado desde el panel/shell de Turso y volver a consultar desde otra sesión o despliegue. No se agrega un endpoint público para revelar variables. **Estado real:** el rechazo de SQLite está probado; la comprobación sobre una URL pública y su persistencia remota sigue pendiente de los accesos de publicación.
+- **Respuesta para la defensa:** Emitir desde la URL HTTPS, comprobar el registro recién creado desde el panel/shell de Turso y volver a consultar desde otra sesión o despliegue. No se agrega un endpoint público para revelar variables. **Estado real:** se emitieron las facturas 52/53 y el recibo 7 desde [la demo pública](https://parcial-2-pr4.vercel.app). Se consultaron directamente en Turso: la factura 53 conserva su anulación y el pago corresponde a la mitad de su total. Otra sesión también recuperó la anulación. El rechazo de SQLite en Vercel está probado.
 
 ### P6.4 — ¿Qué agente usaron y para qué partes del sistema? Muestren algo que el agente hizo mal y cómo lo corrigieron.
 - **Ticket asociado:** Todos (`T01` a `T12`)

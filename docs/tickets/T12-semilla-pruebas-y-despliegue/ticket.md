@@ -1,7 +1,7 @@
 # Ticket T12 — Script de Datos Iniciales (`semilla.ts`), Pruebas Integrales y Despliegue (Vercel + Turso)
 
 - **Responsable:** Pablo (`ramaPablo`)
-- **Estado:** Implementación local verificada; publicación pendiente de accesos.
+- **Estado:** Completado; demo pública y persistencia Turso verificadas.
 - **Hito:** Hito 4 — Cierre
 - **Dependencias:** `T01` a `T11`
 
@@ -75,12 +75,12 @@ Construir el script de datos de prueba (`src/base-de-datos/semilla.ts`) invocand
 - [x] T12.04: fechas privadas coherentes en altas, stock, cuenta, facturas, pagos y anulaciones.
 - [x] T12.05: 6 pagos parciales; repetición conserva datos y no genera duplicados.
 - [x] T12.06: invariantes, numeración, recibos históricos y rollback integral automatizados.
-- [x] T12.07: instalación limpia, 299 pruebas, tipos, build y 35 comprobaciones de navegador; dos regresiones de T10 corregidas.
-- [ ] T12.08: migración y carga en Turso pendientes de cuenta/base y acceso. Configuración y procedimiento preparados.
-- [ ] T12.09: publicación en Vercel pendiente de cuenta/proyecto y destino de entrega.
-- [ ] T12.10: recorrido sobre URL pública HTTPS y persistencia remota pendientes del despliegue.
-- [ ] T12.11: README, auditoría y defensa actualizados; faltan URL pública/evidencia remota y legajos para cerrar la entrega.
+- [x] T12.07: instalación limpia, 301 pruebas, tipos, build y 35 comprobaciones de navegador; dos regresiones de T10 corregidas.
+- [x] T12.08: Turso `parcial-2-pr4-demo` aprovisionado por Marketplace; migraciones, semilla e idempotencia comprobadas.
+- [x] T12.09: [demo HTTPS](https://parcial-2-pr4.vercel.app) en Vercel, proyecto `parcial-2-pr4`, equipo `pablocollantedev-5008`; commit `d4539c8`, estado READY.
+- [x] T12.10: 32 comprobaciones públicas aprobadas, incluida persistencia de factura/pago/anulación en Turso y consulta desde otra sesión.
+- [x] T12.11: README, auditoría, procedimiento y defensa actualizados con URL y evidencia remota. Los legajos no informados se mantienen como pendiente administrativo.
 
 **Decisión sobre repetición:** se implementó una carga sin borrado: una demo completa existente produce una operación sin cambios; una base ajena se rechaza. No hay reinicio destructivo. La primera carga usa una transacción y los servicios existentes. La prueba de fallo a mitad de carga confirma que no quedan datos parciales.
 
-La parte local está verificada. T12 no se marca Completado porque todavía no hay un despliegue verificado en Vercel/Turso. Ver [informe](./informe-auditoria.md) y [procedimiento de publicación](../../despliegue.md).
+T12 está completado: la parte local y el despliegue Vercel/Turso están verificados. El historial remoto conserva las dos ventas y el pago del recorrido público, con 53 facturas, 7 pagos y 11 clientes al cierre. Ver [informe](./informe-auditoria.md) y [procedimiento de publicación](../../despliegue.md).

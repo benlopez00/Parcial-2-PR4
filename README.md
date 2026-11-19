@@ -2,7 +2,7 @@
 
 Aplicación para una ferretería de un solo local: ventas de mostrador, stock y movimientos, clientes y cuenta corriente, pagos con recibo, usuarios por rol y tablero comercial. Los comprobantes son internos, sin validez fiscal.
 
-**Estado al 19/11/2026:** T01–T11 implementados. T12 tiene semilla, integración e instalación local verificadas. **La publicación en Vercel/Turso sigue pendiente de acceso a las cuentas/proyectos de entrega; no hay URL pública verificada.**
+**Estado al 19/11/2026:** T01–T12 implementados y verificados. Demo pública: **[parcial-2-pr4.vercel.app](https://parcial-2-pr4.vercel.app)**, con persistencia en Turso y cuentas de demostración. Los legajos del equipo siguen pendientes de informar.
 
 ## Equipo
 
@@ -57,8 +57,8 @@ La semilla completa se confirma en una transacción. Si falla una operación, no
 
 | Variable | Uso |
 | --- | --- |
-| `DATABASE_URL` | `file:./local.db` en local; URL de Turso en el despliegue. |
-| `DATABASE_AUTH_TOKEN` | Vacío para SQLite; token privado para Turso. |
+| `DATABASE_URL` | `file:./local.db` en local; URL remota si se configura manualmente. En Marketplace se usa `TURSO_DATABASE_URL`. |
+| `DATABASE_AUTH_TOKEN` | Vacío para SQLite; token privado manual. En Marketplace se usa `TURSO_AUTH_TOKEN`. |
 | `SESSION_SECRET` | Firma de sesión. La semilla genera la clave local si falta; configurar otra privada en Vercel. |
 | `SEMILLA_PASSWORD` | Opcional y solo durante la primera carga: contraseña de las cuentas de demo. |
 
@@ -72,7 +72,7 @@ corepack pnpm@11.8.0 run verificar:tipos
 corepack pnpm@11.8.0 run build
 ```
 
-T12 aprobó **299 pruebas en 19 archivos**, tipos y build, también una instalación nueva desde lockfile con migración y semilla dos veces. Pasaron **35 comprobaciones en navegador** sobre la compilación de esa instalación: los tres usuarios, permisos por API, contado por teclado, cliente nuevo con cuenta corriente, pago parcial, anulación, impresión, tablero y listado a 1440/768/390/360 px.
+T12 aprobó **301 pruebas en 19 archivos**, tipos y build, también una instalación nueva desde lockfile con migración y semilla dos veces. Pasaron **35 comprobaciones en navegador** sobre la compilación de esa instalación: los tres usuarios, permisos por API, contado por teclado, cliente nuevo con cuenta corriente, pago parcial, anulación, impresión, tablero y listado a 1440/768/390/360 px.
 
 Las pruebas integrales verifican existencia contra movimientos, saldo contra débitos menos créditos, numeración sin huecos, fechas y saldo histórico de recibos. También prueban repetición sin cambios, rechazo de una base ajena y reversión de toda la semilla ante un fallo tras varias ventas. Las pruebas previas de transacciones, permisos y venta simultánea de la última unidad siguen en la suite.
 
@@ -82,9 +82,11 @@ Guía de código: [AGENTS.md](./AGENTS.md). Preguntas: [respuestas-defensa.md](.
 
 ## Publicación
 
-Seguir [docs/despliegue.md](./docs/despliegue.md): crear/seleccionar la base exclusiva de demo, migrar y cargar una vez, configurar las tres variables privadas en Vercel y comprobar el recorrido sobre HTTPS y contra Turso. No ejecutar migraciones ni semilla como parte del build o de una visita.
+Proyecto `parcial-2-pr4` en el equipo Vercel `pablocollantedev-5008`, Node 22 y pnpm 11.8.0. Turso `parcial-2-pr4-demo`, región `iad1`, plan Starter de $0/mes al aprovisionarlo. La integración administra `TURSO_DATABASE_URL` y `TURSO_AUTH_TOKEN`; `SESSION_SECRET` es privado y diferente en producción y vista previa. No ejecutar migraciones ni semilla como parte del build o de una visita.
 
-Pendientes para cerrar T12: acceso/proyectos de Vercel y Turso, URL pública verificada y legajos del equipo. Los pasos remotos están documentados, pero todavía no se ejecutaron. No se afirma persistencia remota hasta comprobar un registro desde la URL pública en la base Turso.
+Se aplicaron las migraciones y la semilla en Turso; repetirla conservó los datos. El despliegue de `ramaPablo`, commit `d4539c8`, está **READY**. Pasaron **32 comprobaciones remotas**: los tres usuarios, permisos, cookie segura, contado por teclado, alta rápida, cuenta corriente, pago parcial, anulación, impresión, filtros y móvil. Las facturas 52 y 53 y el recibo 7 emitidos por HTTPS se comprobaron directamente en Turso y desde otra sesión. La demo quedó con 53 facturas, 7 pagos y 11 clientes; se conservó ese historial de prueba.
+
+Ver [procedimiento y destino](./docs/despliegue.md) e [informe de T12](./docs/tickets/T12-semilla-pruebas-y-despliegue/informe-auditoria.md). El despliegue se hizo por CLI desde el checkout local; no hay integración Git automática ni se realizó push o merge. Solo faltan los legajos para completar los datos administrativos del equipo.
 
 ## Tickets
 
@@ -101,4 +103,4 @@ Pendientes para cerrar T12: acceso/proyectos de Vercel y Turso, URL pública ver
 | [T09](./docs/tickets/T09-frontend-nueva-venta/ticket.md) | Pablo | Hito 3 | Pantalla de Nueva Venta (`/ventas/nueva`) operable con teclado, alta rápida de cliente en modal y las 3 formas de pago. | Completado |
 | [T10](./docs/tickets/T10-frontend-listado-detalle-y-anulacion-facturas/ticket.md) | Pablo | Hito 3 | Pantallas de Listado de Facturas (`/ventas`), Comprobante imprimible (`/ventas/[id]`) y modal de Anulación. | Completado |
 | [T11](./docs/tickets/T11-tablero-inicio-y-graficos/ticket.md) | Pablo | Hito 4 | Servicio, API (`GET /api/tablero`) y Pantalla del Tablero de Inicio (`/`) con indicadores y gráficos Chart.js. | Completado |
-| [T12](./docs/tickets/T12-semilla-pruebas-y-despliegue/ticket.md) | Pablo | Hito 4 | Script de datos de prueba (`semilla.ts`), pruebas integrales y despliegue en Vercel + Turso. | Local verificado; publicación pendiente |
+| [T12](./docs/tickets/T12-semilla-pruebas-y-despliegue/ticket.md) | Pablo | Hito 4 | Script de datos de prueba (`semilla.ts`), pruebas integrales y despliegue en Vercel + Turso. | Completado |

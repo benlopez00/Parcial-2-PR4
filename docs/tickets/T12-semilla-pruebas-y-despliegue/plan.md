@@ -36,12 +36,12 @@ Pablo · `ramaPablo` · 19/11/2026.
 
 ## 4. Publicación y datos pendientes
 
-Al iniciar T12 no hay CLI autenticada, proyecto vinculado ni base remota configurada. Se solicitó la cuenta/proyecto de Vercel y Turso y los legajos del equipo; se ofreció la conexión de Vercel disponible. Hasta comprobar conexión, migraciones remotas y URL HTTPS, el estado de publicación se mantiene pendiente. La preparación local continúa independiente.
+La cuenta confirmada es `pablocollantedev-5008`. Se vinculó el proyecto `parcial-2-pr4`, se aprovisionó Turso `parcial-2-pr4-demo` en `iad1` mediante Marketplace y se configuraron secretos sin exponerlos. El usuario aceptó los términos de Turso. Las migraciones y la semilla remotas finalizaron; la repetición fue una operación sin cambios. La integración usa los alias nativos `TURSO_DATABASE_URL`/`TURSO_AUTH_TOKEN`, con precedencia de las variables `DATABASE_*` explícitas para desarrollo local. Los legajos siguen sin informar.
 
 ## 5. Defensa
 
-P1.4: comando y datos de demo. P6.1: variables y secretos. P6.2: migraciones locales/remotas, sin afirmarlas ejecutadas si faltan accesos. P6.3: bloqueo de SQLite en Vercel y verificación pública pendiente. P6.4: errores reales reproducidos, reversión de la semilla y correcciones de paginación.
+P1.4: comando y datos de demo. P6.1: variables y secretos. P6.2: migraciones locales y remotas ejecutadas. P6.3: bloqueo de SQLite en Vercel y operaciones HTTPS comprobadas directamente en Turso. P6.4: errores reales reproducidos, reversión de la semilla y correcciones de paginación.
 
 ## 6. Resultado local
 
-299 pruebas, tipos, build e instalación desde cero aprobados; migración y semilla repetida sin duplicados. La compilación de la instalación limpia aprobó 35 comprobaciones de navegador sobre una copia de la base. Ambas regresiones de paginación quedaron corregidas. README y defensa actualizados, con 121 enlaces locales convertidos a rutas portables. La demo oficial funciona en `localhost:3000`. Quedan pendientes publicación y verificación remota de T12.08–T12.10 y cierre de T12.11 con URL y legajos reales.
+301 pruebas, tipos, build e instalación desde cero aprobados; migración y semilla repetida sin duplicados. La compilación de la instalación limpia aprobó 35 comprobaciones de navegador sobre una copia de la base. Ambas regresiones de paginación quedaron corregidas. README y defensa actualizados, con 121 enlaces locales convertidos a rutas portables. La demo oficial funciona en `localhost:3000`. T12.08–T12.11 quedaron completadas con la [demo pública](https://parcial-2-pr4.vercel.app), build remoto y 32 comprobaciones HTTPS. Facturas 52/53 y pago 7 persistidos en Turso. El despliegue corresponde al commit `d4539c8`; el cierre documental posterior no modifica la aplicación. Pendiente administrativo: legajos reales del equipo.
