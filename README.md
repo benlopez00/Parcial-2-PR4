@@ -90,7 +90,15 @@ Se aplicaron las migraciones y la semilla en Turso; repetirla conservó los dato
 
 Ver [procedimiento y destino](./docs/despliegue.md) e [informe de T12](./docs/tickets/T12-semilla-pruebas-y-despliegue/informe-auditoria.md). El despliegue se hizo por CLI desde el checkout local; no hay integración Git automática ni se realizó push o merge. Solo faltan los legajos para completar los datos administrativos del equipo.
 
-## Tickets
+## Tickets y requerimientos implementados
+
+El sistema cubre los cinco bloques funcionales de [docs/requerimientos.md](./docs/requerimientos.md):
+
+- **RF-U** (Acceso y usuarios): inicio/cierre de sesión, cookie `httpOnly`, roles `admin` y `vendedor`, gestión de usuarios.
+- **RF-P** (Categorías, productos y stock): catálogo, altas/ediciones, bajas lógicas, movimientos de stock y alertas bajo mínimo.
+- **RF-C** (Clientes y cuenta corriente): ficha de clientes, límite de crédito, débitos/créditos y registro de pagos con recibo.
+- **RF-V** (Ventas y facturación): nueva venta (efectivo, tarjeta, cuenta corriente), comprobantes internos, listado y anulación.
+- **RF-T** (Tablero comercial): KPIs y gráficos de ventas.
 
 | Ticket | Responsable | Hito | Descripción | Estado |
 | --- | --- | --- | --- | --- |
