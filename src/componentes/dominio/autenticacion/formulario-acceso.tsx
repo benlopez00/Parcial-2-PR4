@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import { useRouter as usarEnrutador } from "next/navigation";
-import { AlertCircle, Eye, EyeOff, LogIn } from "lucide-react";
+import { AlertCircle, Eye, EyeOff, LogIn, ShieldCheck, User } from "lucide-react";
 import { iniciarSesionAccion } from "@/app/login/acciones";
+import { CONTRASENA_DEMOSTRACION, usuariosDemostracion } from "@/base-de-datos/datos-demostracion";
 import { CampoFormulario } from "@/componentes/formularios/campo-formulario";
 import { usarFormularioAccion } from "@/componentes/formularios/usar-formulario-accion";
 import { Alerta, AlertaDescripcion } from "@/componentes/interfaz/alerta";
@@ -13,6 +14,14 @@ import { Apilar } from "@/componentes/maquetacion/apilar";
 import { Texto } from "@/componentes/maquetacion/texto";
 import { Titulo } from "@/componentes/maquetacion/titulo";
 import { esquemaInicioSesion } from "@/validaciones/validacion-autenticacion";
+
+const USUARIOS_ACCESO_RAPIDO = usuariosDemostracion
+  .filter((usuario) => usuario.email === "laura@ferreteria.test" || usuario.email === "pablo@ferreteria.test")
+  .map((usuario) => ({
+    email: usuario.email,
+    etiqueta: `${usuario.rol === "admin" ? "Admin" : "Vendedor"} (${usuario.nombre.split(" ")[0]})`,
+    esAdmin: usuario.rol === "admin",
+  }));
 
 export function FormularioAcceso() {
   const enrutador = usarEnrutador();
@@ -33,6 +42,13 @@ export function FormularioAcceso() {
   async function manejarEnvio(evento: React.FormEvent<HTMLFormElement>) {
     evento.preventDefault();
     await enviar({ email, password: contrasena });
+  }
+
+  function completarCredencialesDemo(emailDemo: string) {
+    setEmail(emailDemo);
+    setContrasena(CONTRASENA_DEMOSTRACION);
+    limpiarErrorCampo("email");
+    limpiarErrorCampo("password");
   }
 
   return (
@@ -115,6 +131,31 @@ export function FormularioAcceso() {
             <span>{enviando ? "Ingresando..." : "Ingresar"}</span>
           </Boton>
         </form>
+
+        <div className="space-y-2 border-t border-border pt-4">
+          <Texto variante="atenuado" className="text-xs">
+            Rellenar acceso rápido (demo):
+          </Texto>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {USUARIOS_ACCESO_RAPIDO.map((cuenta) => {
+              const Icono = cuenta.esAdmin ? ShieldCheck : User;
+              return (
+                <Boton
+                  key={cuenta.email}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={enviando}
+                  onClick={() => completarCredencialesDemo(cuenta.email)}
+                  className="h-9 justify-start"
+                >
+                  <Icono className="size-4 text-muted-foreground" />
+                  <span>{cuenta.etiqueta}</span>
+                </Boton>
+              );
+            })}
+          </div>
+        </div>
       </Apilar>
     </div>
   );
