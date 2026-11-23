@@ -8,9 +8,9 @@ Aplicación para una ferretería de un solo local: ventas de mostrador, stock y 
 
 | Integrante | Legajo | Rama | Tickets |
 | --- | --- | --- | --- |
-| Ben | Pendiente de informar | `ramaBen` | T01–T04 |
-| Álvaro | Pendiente de informar | `ramaAlvaro` | T05–T08 |
-| Pablo | Pendiente de informar | `ramaPablo` | T09–T12 |
+| Eduardo Benjamín López Avila | 63448 | `ramaBen` | T01–T04 |
+| Álvaro Tomás Rojas Sosa | 62088 | `ramaAlvaro` | T05–T08 |
+| Pablo Augusto Collante | 63143 | `ramaPablo` | T09–T12 |
 
 Repositorio: [benlopez00/Parcial-2-PR4](https://github.com/benlopez00/Parcial-2-PR4). Las ramas personales se integran a `desarrollo` y después a `main` según lo acordado con el equipo. T12 no realiza esa integración ni un push automáticamente.
 
