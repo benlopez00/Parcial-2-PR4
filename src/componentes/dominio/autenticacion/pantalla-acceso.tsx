@@ -1,5 +1,11 @@
 import { FormularioAcceso } from "./formulario-acceso";
 
+const INTEGRANTES_GRUPO = [
+  { nombre: "Eduardo Benjamín López Avila", legajo: "63448" },
+  { nombre: "Álvaro Tomás Rojas Sosa", legajo: "62088" },
+  { nombre: "Pablo Augusto Collante", legajo: "63143" },
+] as const;
+
 export function PantallaAcceso() {
   return (
     <div className="grid min-h-dvh grid-cols-1 lg:grid-cols-2">
@@ -35,8 +41,32 @@ export function PantallaAcceso() {
         </p>
       </section>
 
-      <main className="flex items-center justify-center bg-background px-6 py-10 sm:px-10">
-        <FormularioAcceso />
+      <main className="flex flex-col bg-background px-6 py-6 sm:px-10 lg:py-8">
+        <aside
+          aria-label="Integrantes del grupo"
+          className="ml-auto mb-6 w-full max-w-xs rounded-lg border border-border bg-card/60 px-3.5 py-2.5 text-xs text-muted-foreground shadow-xs"
+        >
+          <p className="mb-1.5 font-semibold tracking-wide text-foreground/80">
+            Integrantes del grupo
+          </p>
+          <ul className="space-y-1">
+            {INTEGRANTES_GRUPO.map((integrante) => (
+              <li
+                key={integrante.legajo}
+                className="flex items-center justify-between gap-3"
+              >
+                <span className="truncate">{integrante.nombre}</span>
+                <span className="shrink-0 font-mono text-[11px] font-medium tabular-nums text-foreground/75">
+                  {integrante.legajo}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </aside>
+
+        <div className="flex flex-1 items-center justify-center py-4">
+          <FormularioAcceso />
+        </div>
       </main>
     </div>
   );
